@@ -2,6 +2,10 @@ package opt;
 
 import shared.Instance;
 import shared.Trainer;
+import util.linalg.Vector;
+
+import java.io.FileWriter;
+import java.io.IOException;
 
 /**
  * An abstract class for optimzation algorithms
@@ -35,5 +39,26 @@ public abstract class OptimizationAlgorithm implements Trainer {
      * @return the data
      */
     public abstract Instance getOptimal();
+
+    public String instanceToString(Instance inst){
+        Vector data = inst.getData();
+        String bitstring = "";
+        for (int i = 0; i < data.size(); i++){
+            bitstring += Math.round(data.get(i));
+        }
+        return bitstring;
+    }
+
+    public static void append(String data, String path) {
+        try {
+            FileWriter pw = new FileWriter(path, true);
+            pw.append(data);
+            pw.append("\n");
+            pw.flush();
+            pw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 }

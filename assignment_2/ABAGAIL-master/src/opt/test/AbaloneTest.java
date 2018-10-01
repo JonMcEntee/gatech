@@ -37,8 +37,31 @@ public class AbaloneTest {
     private static String results = "";
 
     private static DecimalFormat df = new DecimalFormat("0.000");
+    private static String result_path = "src/output/abalone_results.csv";
+    private static File result_file = new File(result_path);
+
+    private static String finals_path = "src/output/abalone_finals.csv";
+    private static File finals_file = new File(finals_path);
 
     public static void main(String[] args) {
+        if(result_file.exists()) {
+            result_file.delete();
+        }
+        try {
+            append("algorithm,score", result_path);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if(finals_file.exists()) {
+            finals_file.delete();
+        }
+        try {
+            append("algorithm,classified_correctly,classified_incorrectly,accuracy,training_time,test_time", finals_path);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         for(int i = 0; i < oa.length; i++) {
             networks[i] = factory.createClassificationNetwork(
                 new int[] {inputLayer, hiddenLayer, outputLayer});
@@ -54,14 +77,14 @@ public class AbaloneTest {
             train(oa[i], networks[i], oaNames[i]); //trainer.train();
             end = System.nanoTime();
             trainingTime = end - start;
-            trainingTime /= Math.pow(10,9);
+            trainingTime /= Math.pow(10, 9);
 
             Instance optimalInstance = oa[i].getOptimal();
             networks[i].setWeights(optimalInstance.getData());
 
             double predicted, actual;
             start = System.nanoTime();
-            for(int j = 0; j < instances.length; j++) {
+            for (int j = 0; j < instances.length; j++) {
                 networks[i].setInputValues(instances[j].getData());
                 networks[i].run();
 
@@ -73,8 +96,13 @@ public class AbaloneTest {
             }
             end = System.nanoTime();
             testingTime = end - start;
-            testingTime /= Math.pow(10,9);
-
+            testingTime /= Math.pow(10, 9);
+            try{
+            append(oaNames[i] + "," + correct + "," + incorrect + "," + correct / (correct + incorrect) * 100 + "," +
+                    trainingTime + "," + testingTime, finals_path);
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
             results +=  "\nResults for " + oaNames[i] + ": \nCorrectly classified " + correct + " instances." +
                         "\nIncorrectly classified " + incorrect + " instances.\nPercent correctly classified: "
                         + df.format(correct/(correct+incorrect)*100) + "%\nTraining time: " + df.format(trainingTime)
@@ -99,6 +127,11 @@ public class AbaloneTest {
                 example.setLabel(new Instance(Double.parseDouble(network.getOutputValues().toString())));
                 error += measure.value(output, example);
             }
+            try {
+                append(oaName + "," + error, result_path);
+            } catch (Exception e) {
+            e.printStackTrace();
+             }
 
             System.out.println(df.format(error));
         }
@@ -138,5 +171,13 @@ public class AbaloneTest {
         }
 
         return instances;
+    }
+
+    public static void append(String data, String path) throws IOException{
+        FileWriter pw = new FileWriter(path, true);
+        pw.append(data);
+        pw.append("\n");
+        pw.flush();
+        pw.close();
     }
 }

@@ -6,9 +6,7 @@ import shared.Instance;
 import shared.SumOfSquaresError;
 import func.nn.backprop.*;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.util.Scanner;
 
@@ -26,6 +24,7 @@ public class NNBinaryClassificationTest {
     private static int inputLayer = 7, hiddenLayer = 5, outputLayer = 1, trainingIterations = 1000;
 
     private static DecimalFormat df = new DecimalFormat("0.000");
+    private static String finals_path = "src/output/abalone_finals.csv";
     /**
      * Tests out the perceptron with the classic xor test
      * @param args ignored
@@ -73,6 +72,9 @@ public class NNBinaryClassificationTest {
         end = System.nanoTime();
         testingTime = end - start;
         testingTime /= Math.pow(10,9);
+
+        append("GD," + correct + "," + incorrect + "," + correct/(correct+incorrect)*100 + "," +
+                trainingTime + "," + testingTime, finals_path);
 
         results +=  "\nResults for Gradient Descent: \nCorrectly classified " + correct + " instances." +
                 "\nIncorrectly classified " + incorrect + " instances.\nPercent correctly classified: "
@@ -126,6 +128,18 @@ public class NNBinaryClassificationTest {
         }
 
         return instances;
+    }
+
+    public static void append(String data, String path) {
+        try {
+            FileWriter pw = new FileWriter(path, true);
+            pw.append(data);
+            pw.append("\n");
+            pw.flush();
+            pw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

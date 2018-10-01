@@ -26,7 +26,11 @@ public class MIMIC extends OptimizationAlgorithm {
      * The number of samples to generate
      */
     private int samples;
-    
+
+    private boolean verbose;
+
+    private String path;
+
     /**
      * The number of samples to keep
      */
@@ -45,12 +49,19 @@ public class MIMIC extends OptimizationAlgorithm {
         super(op);
         this.tokeep = tokeep;
         this.samples = samples;
+        this.verbose = false;
         Instance[] data = new Instance[samples];
         for (int i = 0; i < data.length; i++) {
             data[i] = op.random();
         }
         distribution = op.getDistribution();
         distribution.estimate(new DataSet(data));
+    }
+
+    public MIMIC(int samples, int tokeep, ProbabilisticOptimizationProblem op, boolean verbose, String path) {
+        this(samples, tokeep, op);
+        this.verbose = verbose;
+        this.path = path;
     }
 
     /**
@@ -99,6 +110,10 @@ public class MIMIC extends OptimizationAlgorithm {
             }
         }
         distribution.estimate(new DataSet(kept));
+        if (verbose) {
+            System.out.println("MIMIC: " + cutoff);
+            append("MIMIC," + cutoff + ",", path);
+        }
         return cutoff;
     }
 

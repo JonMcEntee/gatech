@@ -3,6 +3,7 @@ package opt;
 import dist.Distribution;
 
 import shared.Instance;
+import util.linalg.Vector;
 
 /**
  * A simulated annealing hill climbing algorithm
@@ -20,6 +21,10 @@ public class SimulatedAnnealing extends OptimizationAlgorithm {
      * The current optimization value
      */
     private double curVal;
+
+    private boolean verbose;
+
+    private String path;
     
     /**
      * The current temperature
@@ -39,10 +44,18 @@ public class SimulatedAnnealing extends OptimizationAlgorithm {
      */
     public SimulatedAnnealing(double t, double cooling, HillClimbingProblem hcp) {
         super(hcp);
+        this.verbose = false;
         this.t = t;
         this.cooling = cooling;
         this.cur = hcp.random();
         this.curVal = hcp.value(cur);
+    }
+
+    public SimulatedAnnealing(double t, double cooling, HillClimbingProblem hcp, boolean verbose,
+                              String path) {
+        this(t, cooling, hcp);
+        this.verbose = verbose;
+        this.path = path;
     }
 
     /**
@@ -58,6 +71,10 @@ public class SimulatedAnnealing extends OptimizationAlgorithm {
             cur = neigh;
         }
         t *= cooling;
+        if (verbose) {
+            System.out.println("SA: " + curVal);
+            append("SA," + curVal + "," + instanceToString(cur), path);
+        }
         return curVal;
     }
 

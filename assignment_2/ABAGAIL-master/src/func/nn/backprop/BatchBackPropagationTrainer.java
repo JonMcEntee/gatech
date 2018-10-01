@@ -8,7 +8,7 @@ import shared.GradientErrorMeasure;
 import shared.Instance;
 import func.nn.NetworkTrainer;
 
-import javax.lang.model.type.NullType;
+import java.io.IOException;
 
 /**
  * A standard batch back propagation trainer
@@ -42,35 +42,41 @@ public class BatchBackPropagationTrainer extends NetworkTrainer {
      * @see nn.Trainer#train()
      */
     public double train() {
-        try {
-            FileWriter pw = new FileWriter("src/opt/test/test.csv", true);
 
-            BackPropagationNetwork network =
-                (BackPropagationNetwork) getNetwork();
-            GradientErrorMeasure measure =
-                (GradientErrorMeasure) getErrorMeasure();
-            DataSet patterns = getDataSet();
-            double error = 0;
-            for (int i = 0; i < patterns.size(); i++) {
-                Instance pattern = patterns.get(i);
-                network.setInputValues(pattern.getData());
-                network.run();
-                Instance output = new Instance(network.getOutputValues());
-                double[] errors = measure.gradient(output, pattern);
-                error += measure.value(output, pattern);
-                network.setOutputErrors(errors);
-                network.backpropagate();
-            }
-            System.out.println(pw);
-            pw.append(Double.toString(error));
-            network.updateWeights(rule);
-            network.clearError();
-            return error / patterns.size();
-        } catch(Exception e) {
-            e.printStackTrace();
-            return 1;
+        BackPropagationNetwork network =
+            (BackPropagationNetwork) getNetwork();
+        GradientErrorMeasure measure =
+            (GradientErrorMeasure) getErrorMeasure();
+        DataSet patterns = getDataSet();
+        double error = 0;
+        for (int i = 0; i < patterns.size(); i++) {
+            Instance pattern = patterns.get(i);
+            network.setInputValues(pattern.getData());
+            network.run();
+            Instance output = new Instance(network.getOutputValues());
+            double[] errors = measure.gradient(output, pattern);
+            error += measure.value(output, pattern);
+            network.setOutputErrors(errors);
+            network.backpropagate();
         }
+        System.out.println(error);
+        try {
+            append(Double.toString(error));
+        } catch (Exception e) {
+            e.getStackTrace();
+        }
+        network.updateWeights(rule);
+        network.clearError();
+        return error / patterns.size();
     }
-    
+
+    public void append(String data) throws IOException{
+        FileWriter pw = new FileWriter("src/output/abalone_results.csv", true);
+        pw.append("GD,");
+        pw.append(data);
+        pw.append("\n");
+        pw.flush();
+        pw.close();
+    }
 
 }

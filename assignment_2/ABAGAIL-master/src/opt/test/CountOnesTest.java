@@ -1,5 +1,7 @@
 package opt.test;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.util.Arrays;
 
 import dist.DiscreteDependencyTree;
@@ -34,7 +36,15 @@ import shared.FixedIterationTrainer;
 public class CountOnesTest {
     /** The n value */
     private static final int N = 80;
-    
+
+    private static String path = "src/output/count_ones_results.csv";
+
+    private static File result_file = new File(path);
+
+    private static String finals_path = "src/output/count_ones_finals.csv";
+
+    private static File finals_file = new File(finals_path);
+
     public static void main(String[] args) {
         int[] ranges = new int[N];
         Arrays.fill(ranges, 2);
@@ -47,25 +57,79 @@ public class CountOnesTest {
         HillClimbingProblem hcp = new GenericHillClimbingProblem(ef, odd, nf);
         GeneticAlgorithmProblem gap = new GenericGeneticAlgorithmProblem(ef, odd, mf, cf);
         ProbabilisticOptimizationProblem pop = new GenericProbabilisticOptimizationProblem(ef, odd, df);
-        
-        RandomizedHillClimbing rhc = new RandomizedHillClimbing(hcp);      
-        FixedIterationTrainer fit = new FixedIterationTrainer(rhc, 200);
+
+        if(result_file.exists()) {
+            result_file.delete();
+        }
+        append("algorithm,score,bitstring", path);
+
+        RandomizedHillClimbing rhc = new RandomizedHillClimbing(hcp, true, path);
+        FixedIterationTrainer fit = new FixedIterationTrainer(rhc, 100);
         fit.train();
-        System.out.println(ef.value(rhc.getOptimal()));
-        
-        SimulatedAnnealing sa = new SimulatedAnnealing(100, .95, hcp);
-        fit = new FixedIterationTrainer(sa, 200);
+
+        SimulatedAnnealing sa = new SimulatedAnnealing(100, .95, hcp, true, path);
+        fit = new FixedIterationTrainer(sa, 100);
         fit.train();
-        System.out.println(ef.value(sa.getOptimal()));
-        
-        StandardGeneticAlgorithm ga = new StandardGeneticAlgorithm(20, 20, 0, gap);
-        fit = new FixedIterationTrainer(ga, 300);
+
+        StandardGeneticAlgorithm ga = new StandardGeneticAlgorithm(20, 20, 0, gap, true, path);
+        fit = new FixedIterationTrainer(ga, 100);
         fit.train();
-        System.out.println(ef.value(ga.getOptimal()));
-        
-        MIMIC mimic = new MIMIC(50, 10, pop);
+
+        MIMIC mimic = new MIMIC(50, 10, pop, true, path);
         fit = new FixedIterationTrainer(mimic, 100);
         fit.train();
-        System.out.println(ef.value(mimic.getOptimal()));
+
+        if(finals_file.exists()) {
+            finals_file.delete();
+        }
+        append("algorithm,score,iterations,training_time", finals_path);
+
+        double start = System.nanoTime(), end, trainingTime;
+        rhc = new RandomizedHillClimbing(hcp);
+        fit = new FixedIterationTrainer(rhc, 1000);
+        fit.train();
+        end = System.nanoTime();
+        trainingTime = end - start;
+        double optimal_score = ef.value(rhc.getOptimal());
+        append("RHC," + optimal_score + ",1000," + trainingTime/Math.pow(10, 9), finals_path);
+
+        start = System.nanoTime();
+        sa = new SimulatedAnnealing(100, .95, hcp);
+        fit = new FixedIterationTrainer(sa, 200);
+        fit.train();
+        end = System.nanoTime();
+        trainingTime = end - start;
+        optimal_score = ef.value(sa.getOptimal());
+        append("SA," + optimal_score + ",1000," + trainingTime/Math.pow(10, 9), finals_path);
+
+        start = System.nanoTime();
+        ga = new StandardGeneticAlgorithm(20, 20, 0, gap);
+        fit = new FixedIterationTrainer(ga, 300);
+        fit.train();
+        end = System.nanoTime();
+        trainingTime = end - start;
+        optimal_score = ef.value(ga.getOptimal());
+        append("GA," + optimal_score + ",300," + trainingTime/Math.pow(10, 9), finals_path);
+
+        start = System.nanoTime();
+        mimic = new MIMIC(50, 10, pop);
+        fit = new FixedIterationTrainer(mimic, 100);
+        fit.train();
+        end = System.nanoTime();
+        trainingTime = end - start;
+        optimal_score = ef.value(mimic.getOptimal());
+        append("MIMIC," + optimal_score + ",100," + trainingTime/Math.pow(10, 9), finals_path);
+    }
+
+    public static void append(String data, String path) {
+        try {
+            FileWriter pw = new FileWriter(path, true);
+            pw.append(data);
+            pw.append("\n");
+            pw.flush();
+            pw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
