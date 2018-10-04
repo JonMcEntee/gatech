@@ -1,0 +1,59 @@
+---
+title: "Machine Learning - Assignment 2"
+author: "Jonathan McEntee"
+date: "10/3/2018"
+output:
+  pdf_document
+#classoption: twocolumn
+header-includes:
+  \usepackage{tikz}
+  \usetikzlibrary{matrix,chains,positioning,decorations.pathreplacing,arrows}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(extrafont)
+abalone_results <- read_csv("results/abalone_results.csv")
+```
+
+# Neural Network Weights With Randomized Optimization
+
+The first experiment carried out, using the ABAGAIL library for java, applied three randomized optimization algorithms (randomized hill climbing, simulated annealing, and a genetic algorithm) to the problem of finding optimal weights for a neural network. The neural network had seven inputs, an output node, and used a single hidden layer with five nodes. The objective of each algorithm was to minimize the sum of squares error between the categorical target value (0 or 1) and the output of the neural net. Put more precisely, the loss function for this experiment was:
+
+$$error = \sum_{n=1}^m (t_i - o_i)^2$$
+Where $t_i$ is the target value of the ith instance and $o_i$ was the output of the neural net for the ith instance.
+
+## Abalone Data Set
+
+The abalone data set, available with the ABAGAIL package, presents the problem of mapping a number of physical measurements of 4000+ abalone to its age (roughly equal to the number of rings within its shell). The data given with the ABAGAIL package has been preprocessed and normalized. To make a binary classification problem, our neural network will try to predict if the abalone has more or less than 15 rings inside its shell.\linebreak
+
+```{r, fig.width=6, fig.height=3, message=FALSE, fig.align="center"}
+read_csv("results/abalone_results_2.csv") %>%
+  mutate(score = 1/score) %>%
+  group_by(algorithm) %>%
+  mutate(x = seq(1:1000)) %>%
+  ungroup() %>%
+  filter(x %in% seq(1, 1000, 49)) %>%
+  ggplot(aes(x = x, y = score, color = algorithm)) +
+  geom_line() +
+  geom_point() +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold"),
+    legend.position = c(1,1),
+    legend.justification = c(1,1),
+    text = element_text(size = 10, family = "CMU Serif")
+  ) +
+  labs(
+    title = "Error vs. Iterations on Abalone Dataset",
+    subtitle = "For Various Randomized Optimization Algorithms",
+    x = "Iterations",
+    y = "Error",
+    color = NULL
+  )
+```
+
+continuing text
+
+# Solving The "Flip Flop" Problem With Randomized Optimization
