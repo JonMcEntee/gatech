@@ -34,7 +34,7 @@ import shared.FixedIterationTrainer;
  */
 public class FourPeaksTest {
     /** The n value */
-    private static final int N = 200;
+    private static final int N = 50;
     /** The t value */
     private static final int T = N / 5;
 
@@ -64,30 +64,14 @@ public class FourPeaksTest {
         }
         append("algorithm,score,bitstring", path);
 
-        RandomizedHillClimbing rhc = new RandomizedHillClimbing(hcp, true, path);
-        FixedIterationTrainer fit = new FixedIterationTrainer(rhc, 1000);
-        fit.train();
-
-        SimulatedAnnealing sa = new SimulatedAnnealing(1E11, .95, hcp, true, path);
-        fit = new FixedIterationTrainer(sa, 1000);
-        fit.train();
-
-        StandardGeneticAlgorithm ga = new StandardGeneticAlgorithm(200, 100, 10, gap, true, path);
-        fit = new FixedIterationTrainer(ga, 1000);
-        fit.train();
-
-        MIMIC mimic = new MIMIC(200, 20, pop, true, path);
-        fit = new FixedIterationTrainer(mimic, 1000);
-        fit.train();
-
         if(finals_file.exists()) {
             finals_file.delete();
         }
         append("algorithm,score,iterations,training_time", finals_path);
 
         double start = System.nanoTime(), end, trainingTime;
-        rhc = new RandomizedHillClimbing(hcp);
-        fit = new FixedIterationTrainer(rhc, 20000);
+        RandomizedHillClimbing rhc = new RandomizedHillClimbing(hcp, true, path);
+        FixedIterationTrainer fit = new FixedIterationTrainer(rhc, 10000);
         fit.train();
         end = System.nanoTime();
         trainingTime = end - start;
@@ -95,8 +79,8 @@ public class FourPeaksTest {
         append("RHC," + optimal_score + ",20000," + trainingTime/Math.pow(10, 9), finals_path);
 
         start = System.nanoTime();
-        sa = new SimulatedAnnealing(100, .95, hcp);
-        fit = new FixedIterationTrainer(sa, 20000);
+        SimulatedAnnealing sa = new SimulatedAnnealing(100, .95, hcp, true, path);
+        fit = new FixedIterationTrainer(sa, 10000);
         fit.train();
         end = System.nanoTime();
         trainingTime = end - start;
@@ -104,7 +88,7 @@ public class FourPeaksTest {
         append("SA," + optimal_score + ",20000," + trainingTime/Math.pow(10, 9), finals_path);
 
         start = System.nanoTime();
-        ga = new StandardGeneticAlgorithm(200, 100, 10, gap);
+        StandardGeneticAlgorithm ga = new StandardGeneticAlgorithm(500, 100, 10, gap, true, path);
         fit = new FixedIterationTrainer(ga, 1000);
         fit.train();
         end = System.nanoTime();
@@ -113,7 +97,7 @@ public class FourPeaksTest {
         append("GA," + optimal_score + ",1000," + trainingTime/Math.pow(10, 9), finals_path);
 
         start = System.nanoTime();
-        mimic = new MIMIC(200, 20, pop);
+        MIMIC mimic = new MIMIC(200, 30, pop, true, path);
         fit = new FixedIterationTrainer(mimic, 1000);
         fit.train();
         end = System.nanoTime();

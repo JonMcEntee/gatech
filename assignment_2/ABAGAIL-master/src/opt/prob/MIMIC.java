@@ -111,8 +111,8 @@ public class MIMIC extends OptimizationAlgorithm {
         }
         distribution.estimate(new DataSet(kept));
         if (verbose) {
-            System.out.println("MIMIC: " + cutoff);
-            append("MIMIC," + cutoff + ",", path);
+            System.out.println("MIMIC: " + op.value(getOptimal()));
+            append("MIMIC," + cutoff + "," + instanceToString(getOptimal()), path);
         }
         return cutoff;
     }

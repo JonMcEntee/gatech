@@ -16,6 +16,37 @@ library(tidyverse)
 library(extrafont)
 adult_results <- read_csv("results/adult_results.csv")
 adult_finals <- read_csv("results/adult_finals.csv")
+
+flip_flop_results <- read_csv("results/flip_flop_results.csv")
+
+plot_data <- function(df, title=NULL, subtitle=NULL,
+                      xlab=NULL, ylab=NULL, invert=FALSE,
+                      justification = c(1,0)) {
+  if (invert) df <- df %>% mutate(score = 1/score)
+  
+  df %>%
+    group_by(algorithm) %>%
+    mutate(x = seq(1:n()) / n()) %>%
+    # filter(x %in% seq(1, n(), (n() / 20) - 1)) %>%
+    ungroup() %>%
+    ggplot(aes(x = x, y = score, color = algorithm)) +
+    geom_line() +
+    # geom_point() +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(face = "bold"),
+      legend.position = justification,
+      legend.justification = justification,
+      text = element_text(size = 10, family = "CMU Serif")
+    ) +
+    labs(
+      title = title,
+      subtitle = subtitle,
+      x = xlab,
+      y = ylab,
+      color = NULL
+    )
+}
 ```
 
 # Neural Network Weights With Randomized Optimization
@@ -35,28 +66,13 @@ The four algorithms were trained for 1000 iterations each on the adult data.\new
 
 ```{r, fig.width=6, fig.height=3, message=FALSE, warning=FALSE, fig.align="center"}
 adult_results %>%
-  mutate(score = 1/score) %>%
-  group_by(algorithm) %>%
-  mutate(x = seq(1:1000)) %>%
-  ungroup() %>%
-  filter(x %in% seq(1, 1000, 49)) %>%
-  ggplot(aes(x = x, y = score, color = algorithm)) +
-  geom_line() +
-  geom_point() +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(face = "bold"),
-    legend.position = c(1,1),
-    legend.justification = c(1,1),
-    text = element_text(size = 10, family = "CMU Serif")
-  ) +
-  labs(
+  plot_data(
     title = "Squared Error vs. Iterations on Adult Dataset",
     subtitle = "For Various Randomized Optimization Algorithms",
-    x = "Iterations",
-    y = "Error",
-    color = NULL
-  )
+    xlab = "Iterations",
+    ylab = "Error",
+    invert = TRUE,
+    justification = c(1,1))
 ```
 
 The leftmost point for each algorithm on the graph above represents the sum of squares error (over the training data) after one iteration. By the time one iteration has passed, the gradient descent backpropagation algorithm has already reduced its squared error to 3933, lower than any of the randomized algorithms. It then quickly converges to about 1630, and (very, very slowly) continues to drop. The speed and accuracy with which gradient descent fits data is why it is often the first choice for training neural nets.
@@ -90,3 +106,35 @@ adult_finals %>%
 
 # Solving The "Flip Flop" Problem With Randomized Optimization
 
+
+```{r, fig.width=6, fig.height=3, message=FALSE, fig.align="center"}
+read_csv("results/flip_flop_results.csv") %>%
+  plot_data(
+    title = "The 'Flip Flop' Problem",
+    xlab = "Iterations",
+    ylab = "Error")
+```
+
+```{r, fig.width=6, fig.height=3, message=FALSE, fig.align="center"}
+read_csv("results/continuous_peaks_results.csv") %>%
+  plot_data(
+    title = "The 'Continuous Peaks' Problem",
+    xlab = "Iterations",
+    ylab = "Error")
+```
+
+```{r, fig.width=6, fig.height=3, message=FALSE, fig.align="center"}
+read_csv("results/count_ones_results.csv") %>%
+  plot_data(
+    title = "The 'Count Ones' Problem",
+    xlab = "Iterations",
+    ylab = "Error")
+```
+
+```{r, fig.width=6, fig.height=3, message=FALSE, fig.align="center"}
+read_csv("results/four_peaks_results.csv") %>%
+  plot_data(
+    title = "The 'Four Peaks' Problem",
+    xlab = "Iterations",
+    ylab = "Error")
+```

@@ -35,7 +35,7 @@ import shared.FixedIterationTrainer;
  */
 public class CountOnesTest {
     /** The n value */
-    private static final int N = 80;
+    private static final int N = 300;
 
     private static String path = "src/output/count_ones_results.csv";
 
@@ -63,30 +63,14 @@ public class CountOnesTest {
         }
         append("algorithm,score,bitstring", path);
 
-        RandomizedHillClimbing rhc = new RandomizedHillClimbing(hcp, true, path);
-        FixedIterationTrainer fit = new FixedIterationTrainer(rhc, 100);
-        fit.train();
-
-        SimulatedAnnealing sa = new SimulatedAnnealing(100, .95, hcp, true, path);
-        fit = new FixedIterationTrainer(sa, 100);
-        fit.train();
-
-        StandardGeneticAlgorithm ga = new StandardGeneticAlgorithm(20, 20, 0, gap, true, path);
-        fit = new FixedIterationTrainer(ga, 100);
-        fit.train();
-
-        MIMIC mimic = new MIMIC(50, 10, pop, true, path);
-        fit = new FixedIterationTrainer(mimic, 100);
-        fit.train();
-
         if(finals_file.exists()) {
             finals_file.delete();
         }
         append("algorithm,score,iterations,training_time", finals_path);
 
         double start = System.nanoTime(), end, trainingTime;
-        rhc = new RandomizedHillClimbing(hcp);
-        fit = new FixedIterationTrainer(rhc, 1000);
+        RandomizedHillClimbing rhc = new RandomizedHillClimbing(hcp, true, path);
+        FixedIterationTrainer fit = new FixedIterationTrainer(rhc, 1000);
         fit.train();
         end = System.nanoTime();
         trainingTime = end - start;
@@ -94,8 +78,8 @@ public class CountOnesTest {
         append("RHC," + optimal_score + ",1000," + trainingTime/Math.pow(10, 9), finals_path);
 
         start = System.nanoTime();
-        sa = new SimulatedAnnealing(100, .95, hcp);
-        fit = new FixedIterationTrainer(sa, 200);
+        SimulatedAnnealing sa = new SimulatedAnnealing(100, .95, hcp, true, path);
+        fit = new FixedIterationTrainer(sa, 1000);
         fit.train();
         end = System.nanoTime();
         trainingTime = end - start;
@@ -103,7 +87,7 @@ public class CountOnesTest {
         append("SA," + optimal_score + ",1000," + trainingTime/Math.pow(10, 9), finals_path);
 
         start = System.nanoTime();
-        ga = new StandardGeneticAlgorithm(20, 20, 0, gap);
+        StandardGeneticAlgorithm ga = new StandardGeneticAlgorithm(20, 20, 0, gap, true, path);
         fit = new FixedIterationTrainer(ga, 300);
         fit.train();
         end = System.nanoTime();
@@ -112,7 +96,7 @@ public class CountOnesTest {
         append("GA," + optimal_score + ",300," + trainingTime/Math.pow(10, 9), finals_path);
 
         start = System.nanoTime();
-        mimic = new MIMIC(50, 10, pop);
+        MIMIC mimic = new MIMIC(50, 10, pop, true, path);
         fit = new FixedIterationTrainer(mimic, 100);
         fit.train();
         end = System.nanoTime();
