@@ -61,7 +61,7 @@ public class BatchBackPropagationTrainer extends NetworkTrainer {
         }
         System.out.println(error);
         try {
-            append(Double.toString(error));
+            append(Double.toString(1 / error));
         } catch (Exception e) {
             e.getStackTrace();
         }

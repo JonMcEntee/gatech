@@ -14,22 +14,27 @@ header-includes:
 knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
 library(extrafont)
-abalone_results <- read_csv("results/abalone_results.csv")
+adult_results <- read_csv("results/adult_results.csv")
+adult_finals <- read_csv("results/adult_finals.csv")
 ```
 
 # Neural Network Weights With Randomized Optimization
 
-The first experiment carried out, using the ABAGAIL library for java, applied three randomized optimization algorithms (randomized hill climbing, simulated annealing, and a genetic algorithm) to the problem of finding optimal weights for a neural network. The neural network had seven inputs, an output node, and used a single hidden layer with five nodes. The objective of each algorithm was to minimize the sum of squares error between the categorical target value (0 or 1) and the output of the neural net. Put more precisely, the loss function for this experiment was:
+The first experiment carried out, using the ABAGAIL library for java, applied three randomized optimization algorithms (randomized hill climbing, simulated annealing, and a genetic algorithm) to the problem of finding optimal weights for a neural network. Gradient descent was also performed for comparison. The neural network had fourteen inputs, an output node, and used a single hidden layer with five nodes. The objective of each algorithm was to minimize the sum of squares error between the categorical target value (0 or 1) and the output of the neural net. Put more precisely, the loss function for this experiment was:
 
 $$error = \sum_{n=1}^m (t_i - o_i)^2$$
 Where $t_i$ is the target value of the ith instance and $o_i$ was the output of the neural net for the ith instance.
 
-## Abalone Data Set
+## Adult Data Set
 
-The abalone data set, available with the ABAGAIL package, presents the problem of mapping a number of physical measurements of 4000+ abalone to its age (roughly equal to the number of rings within its shell). The data given with the ABAGAIL package has been preprocessed and normalized. To make a binary classification problem, our neural network will try to predict if the abalone has more or less than 15 rings inside its shell.\linebreak
+The Adult dataset has 32,000+ samples and features for each adult including their age, sex, race, etc. In my last experiment I subsampled the full dataset down to 6000 samples to save time on training. This time all 32,000+ samples were used. I also pre-processed the data: first selecting the 14 most relevant attributes, then scaling the data so all sample features were between -1 and 1, to prevent overdependence on variables with a larger range. The objective, as before, is to estimate whether the adult represented by the sample has an income greater than $50,000.
 
-```{r, fig.width=6, fig.height=3, message=FALSE, fig.align="center"}
-read_csv("results/abalone_results_2.csv") %>%
+## Results
+
+The four algorithms were trained for 1000 iterations each on the adult data.\newline
+
+```{r, fig.width=6, fig.height=3, message=FALSE, warning=FALSE, fig.align="center"}
+adult_results %>%
   mutate(score = 1/score) %>%
   group_by(algorithm) %>%
   mutate(x = seq(1:1000)) %>%
@@ -46,7 +51,7 @@ read_csv("results/abalone_results_2.csv") %>%
     text = element_text(size = 10, family = "CMU Serif")
   ) +
   labs(
-    title = "Error vs. Iterations on Abalone Dataset",
+    title = "Squared Error vs. Iterations on Adult Dataset",
     subtitle = "For Various Randomized Optimization Algorithms",
     x = "Iterations",
     y = "Error",
@@ -54,6 +59,34 @@ read_csv("results/abalone_results_2.csv") %>%
   )
 ```
 
-continuing text
+The leftmost point for each algorithm on the graph above represents the sum of squares error (over the training data) after one iteration. By the time one iteration has passed, the gradient descent backpropagation algorithm has already reduced its squared error to 3933, lower than any of the randomized algorithms. It then quickly converges to about 1630, and (very, very slowly) continues to drop. The speed and accuracy with which gradient descent fits data is why it is often the first choice for training neural nets.
+
+Randomized hill climbing ekes out second place. Though randomized hill climbing is completely unable to remove itself from local optima, that didn't seem to hurt it much in this case. The simulated annealing algorithm stands out the most when graphed. It rises and falls, although the rises are less high as the algorithm iterates. This is what we expect as the simulated annealing algorithm's temperature paramater cools over time, making the algorithm less likely to accept a value which raises the error. It is unable to converge in the same was as the other algorithms within 1000 iterations and has the highest error.
+
+The genetic algorithm has a similar trajectory to the randomized algorithm in that it quickly declines and levels out, but it also apparently rises in some places. This is because the genetic algorithm doesn't necessarily hold on to its fittest member between generations. The algorithm generates a distribution which weights each member of its population by fitness, and then samples from that distribution. This is to prevent falling into local optima. However the genetic algorithm ultimately had a higher error than randomized hill climbing and a much longer training time.
+
+```{r}
+adult_finals %>%
+  mutate(
+    accuracy = paste0(accuracy %>% round(1), "%"),
+    training_time = paste(round(training_time / 60, 1), "min"),
+    test_time = paste(round(test_time, 1), "sec"),
+    algorithm = recode(algorithm,
+                       RHC = "Randomized Hill Climbing",
+                       GA = "Genetic Algorithm",
+                       SA = "Simulated Annealing",
+                       GD = "Gradient Descent")
+  ) %>%
+  rename(
+    Algorithm = algorithm,
+    Correct = classified_correctly,
+    Incorrect = classified_incorrectly,
+    Accuracy = accuracy,
+    `Training Time` = training_time,
+    `Test Time` = test_time
+  ) %>%
+  knitr::kable()
+```
 
 # Solving The "Flip Flop" Problem With Randomized Optimization
+

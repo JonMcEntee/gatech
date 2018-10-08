@@ -135,7 +135,7 @@ public class StandardGeneticAlgorithm extends OptimizationAlgorithm {
         population = newPopulation;
         values = newValues;
         if (verbose) {
-            System.out.println("GA: " + (sum / populationSize));
+            System.out.println("GA: " + ga.value(getOptimal()));
             append("GA," + (sum / populationSize) + ",", path);
         }
         return sum / populationSize;

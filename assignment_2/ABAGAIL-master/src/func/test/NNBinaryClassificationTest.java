@@ -21,7 +21,7 @@ public class NNBinaryClassificationTest {
 
     private static String results = "";
 
-    private static int inputLayer = 7, hiddenLayer = 5, outputLayer = 1, trainingIterations = 1000;
+    private static int inputLayer = 14, hiddenLayer = 5, outputLayer = 1, trainingIterations = 1000;
 
     private static DecimalFormat df = new DecimalFormat("0.000");
     private static String finals_path = "src/output/abalone_finals.csv";
@@ -96,21 +96,22 @@ public class NNBinaryClassificationTest {
 
     private static Instance[] initializeInstances() {
 
-        double[][][] attributes = new double[4177][][];
+        double[][][] attributes = new double[32560][][];
 
         try {
-            BufferedReader br = new BufferedReader(new FileReader(new File("src/opt/test/abalone.txt")));
+            BufferedReader br = new BufferedReader(new FileReader(new File("src/opt/test/formatted_adult_data.csv")));
 
             for(int i = 0; i < attributes.length; i++) {
                 Scanner scan = new Scanner(br.readLine());
                 scan.useDelimiter(",");
 
                 attributes[i] = new double[2][];
-                attributes[i][0] = new double[7]; // 7 attributes
+                attributes[i][0] = new double[14]; // 7 attributes
                 attributes[i][1] = new double[1];
 
-                for(int j = 0; j < 7; j++)
+                for(int j = 0; j < 14; j++) {
                     attributes[i][0][j] = Double.parseDouble(scan.next());
+                }
 
                 attributes[i][1][0] = Double.parseDouble(scan.next());
             }
@@ -124,7 +125,7 @@ public class NNBinaryClassificationTest {
         for(int i = 0; i < instances.length; i++) {
             instances[i] = new Instance(attributes[i][0]);
             // classifications range from 0 to 30; split into 0 - 14 and 15 - 30
-            instances[i].setLabel(new Instance(attributes[i][1][0] < 15 ? 0 : 1));
+            instances[i].setLabel(new Instance(attributes[i][1][0]));
         }
 
         return instances;
