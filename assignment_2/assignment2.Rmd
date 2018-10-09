@@ -14,10 +14,12 @@ header-includes:
 knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
 library(extrafont)
+
 adult_results <- read_csv("results/adult_results.csv")
 adult_finals <- read_csv("results/adult_finals.csv")
 
 flip_flop_results <- read_csv("results/flip_flop_results.csv")
+flip_flop_finals <- read_csv("results/flip_flop_finals.csv")
 
 plot_data <- function(df, title=NULL, subtitle=NULL,
                       xlab=NULL, ylab=NULL, invert=FALSE,
@@ -26,8 +28,7 @@ plot_data <- function(df, title=NULL, subtitle=NULL,
   
   df %>%
     group_by(algorithm) %>%
-    mutate(x = seq(1:n()) / n()) %>%
-    # filter(x %in% seq(1, n(), (n() / 20) - 1)) %>%
+    mutate(x = iteration / n()) %>%
     ungroup() %>%
     ggplot(aes(x = x, y = score, color = algorithm)) +
     geom_line() +
@@ -108,15 +109,41 @@ adult_finals %>%
 
 
 ```{r, fig.width=6, fig.height=3, message=FALSE, fig.align="center"}
-read_csv("results/flip_flop_results.csv") %>%
+flip_flop_results %>%
+  filter(run_num == 20) %>%
   plot_data(
     title = "The 'Flip Flop' Problem",
     xlab = "Iterations",
     ylab = "Error")
 ```
 
+```{r}
+flip_flop_finals %>%
+  group_by(algorithm) %>%
+  summarize(
+    score = mean(score),
+    iterations = mean(iterations),
+    training_time = mean(training_time)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    training_time = paste(round(training_time, 1), "sec"),
+    algorithm = recode(algorithm,
+                       RHC = "Randomized Hill Climbing",
+                       GA = "Genetic Algorithm",
+                       SA = "Simulated Annealing")
+  ) %>%
+  rename(
+    Algorithm = algorithm,
+    Score = score,
+    `Training Time` = training_time
+  ) %>%
+  knitr::kable()
+```
+
 ```{r, fig.width=6, fig.height=3, message=FALSE, fig.align="center"}
 read_csv("results/continuous_peaks_results.csv") %>%
+  filter(run_num == 20) %>%
   plot_data(
     title = "The 'Continuous Peaks' Problem",
     xlab = "Iterations",
@@ -125,6 +152,7 @@ read_csv("results/continuous_peaks_results.csv") %>%
 
 ```{r, fig.width=6, fig.height=3, message=FALSE, fig.align="center"}
 read_csv("results/count_ones_results.csv") %>%
+  filter(run_num == 20) %>%
   plot_data(
     title = "The 'Count Ones' Problem",
     xlab = "Iterations",
@@ -133,6 +161,7 @@ read_csv("results/count_ones_results.csv") %>%
 
 ```{r, fig.width=6, fig.height=3, message=FALSE, fig.align="center"}
 read_csv("results/four_peaks_results.csv") %>%
+  filter(run_num == 2) %>%
   plot_data(
     title = "The 'Four Peaks' Problem",
     xlab = "Iterations",

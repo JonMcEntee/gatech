@@ -41,6 +41,10 @@ public class StandardGeneticAlgorithm extends OptimizationAlgorithm {
     private boolean verbose;
 
     private String path;
+
+    private int testNumber;
+
+    private int iterNumber = 0;
     
     /**
      * The population
@@ -76,10 +80,11 @@ public class StandardGeneticAlgorithm extends OptimizationAlgorithm {
     }
 
     public StandardGeneticAlgorithm(int populationSize, int toMate, int toMutate, GeneticAlgorithmProblem gap,
-                                    boolean verbose, String path) {
+                                    boolean verbose, int testNumber, String path) {
         this(populationSize, toMate, toMutate, gap);
         this.verbose = verbose;
         this.path = path;
+        this.testNumber = testNumber;
     }
 
     /**
@@ -135,8 +140,9 @@ public class StandardGeneticAlgorithm extends OptimizationAlgorithm {
         population = newPopulation;
         values = newValues;
         if (verbose) {
-            System.out.println("GA: " + ga.value(getOptimal()));
-            append("GA," + (sum / populationSize) + ",", path);
+            //System.out.println("GA: " + ga.value(getOptimal()));
+            append("GA," + this.testNumber + "," + iterNumber +  "," + (sum / populationSize) + "," + instanceToString(getOptimal()), path);
+            iterNumber++;
         }
         return sum / populationSize;
     }

@@ -23,6 +23,10 @@ public class RandomizedHillClimbing extends OptimizationAlgorithm {
     private boolean verbose;
 
     private String path;
+
+    private int testNumber;
+
+    private int iterNumber = 0;
     
     /**
      * Make a new randomized hill climbing
@@ -34,10 +38,11 @@ public class RandomizedHillClimbing extends OptimizationAlgorithm {
         curVal = hcp.value(cur);
     }
 
-    public RandomizedHillClimbing(HillClimbingProblem hcp, boolean verbose, String path) {
+    public RandomizedHillClimbing(HillClimbingProblem hcp, boolean verbose, int testNumber, String path) {
         this(hcp);
         this.verbose = verbose;
         this.path = path;
+        this.testNumber = testNumber;
     }
 
     /**
@@ -51,9 +56,11 @@ public class RandomizedHillClimbing extends OptimizationAlgorithm {
             curVal = neighVal;
             cur = neigh;
         }
+
         if(verbose) {
-            System.out.println("RHC: " + curVal);
-            append("RHC," + curVal + "," + instanceToString(cur), path);
+            // System.out.println("RHC: " + curVal);
+            append("RHC," + this.testNumber + "," + iterNumber + "," + curVal + "," + instanceToString(cur), path);
+            iterNumber++;
         }
         return curVal;
     }

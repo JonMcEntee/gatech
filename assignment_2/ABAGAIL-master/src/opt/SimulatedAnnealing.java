@@ -25,7 +25,11 @@ public class SimulatedAnnealing extends OptimizationAlgorithm {
     private boolean verbose;
 
     private String path;
-    
+
+    private int testNumber;
+
+    private int iterNumber = 0;
+
     /**
      * The current temperature
      */
@@ -51,11 +55,12 @@ public class SimulatedAnnealing extends OptimizationAlgorithm {
         this.curVal = hcp.value(cur);
     }
 
-    public SimulatedAnnealing(double t, double cooling, HillClimbingProblem hcp, boolean verbose,
+    public SimulatedAnnealing(double t, double cooling, HillClimbingProblem hcp, boolean verbose, int testNumber,
                               String path) {
         this(t, cooling, hcp);
         this.verbose = verbose;
         this.path = path;
+        this.testNumber = testNumber;
     }
 
     /**
@@ -72,8 +77,9 @@ public class SimulatedAnnealing extends OptimizationAlgorithm {
         }
         t *= cooling;
         if (verbose) {
-            System.out.println("SA: " + curVal);
-            append("SA," + curVal + "," + instanceToString(cur), path);
+            //System.out.println("SA: " + curVal);
+            append("SA," + this.testNumber + "," + iterNumber + "," + curVal + "," + instanceToString(cur), path);
+            iterNumber++;
         }
         return curVal;
     }

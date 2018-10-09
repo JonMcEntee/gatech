@@ -35,7 +35,9 @@ import shared.FixedIterationTrainer;
  */
 public class CountOnesTest {
     /** The n value */
-    private static final int N = 300;
+    private static final int N = 100;
+
+    private static final int ITER = 100;
 
     private static String path = "src/output/count_ones_results.csv";
 
@@ -46,6 +48,22 @@ public class CountOnesTest {
     private static File finals_file = new File(finals_path);
 
     public static void main(String[] args) {
+        if(result_file.exists()) {
+            result_file.delete();
+        }
+        append("algorithm,run_num,iteration,score,bitstring", path);
+
+        if(finals_file.exists()) {
+            finals_file.delete();
+        }
+        append("algorithm,run_num,score,iterations,training_time", finals_path);
+
+        for (int i = 0; i < ITER; i++) {
+            oneRun(i);
+        }
+    }
+
+    public static void oneRun(int testNumber) {
         int[] ranges = new int[N];
         Arrays.fill(ranges, 2);
         EvaluationFunction ef = new CountOnesEvaluationFunction();
@@ -58,51 +76,41 @@ public class CountOnesTest {
         GeneticAlgorithmProblem gap = new GenericGeneticAlgorithmProblem(ef, odd, mf, cf);
         ProbabilisticOptimizationProblem pop = new GenericProbabilisticOptimizationProblem(ef, odd, df);
 
-        if(result_file.exists()) {
-            result_file.delete();
-        }
-        append("algorithm,score,bitstring", path);
-
-        if(finals_file.exists()) {
-            finals_file.delete();
-        }
-        append("algorithm,score,iterations,training_time", finals_path);
-
         double start = System.nanoTime(), end, trainingTime;
-        RandomizedHillClimbing rhc = new RandomizedHillClimbing(hcp, true, path);
+        RandomizedHillClimbing rhc = new RandomizedHillClimbing(hcp, true, testNumber, path);
         FixedIterationTrainer fit = new FixedIterationTrainer(rhc, 1000);
         fit.train();
         end = System.nanoTime();
         trainingTime = end - start;
         double optimal_score = ef.value(rhc.getOptimal());
-        append("RHC," + optimal_score + ",1000," + trainingTime/Math.pow(10, 9), finals_path);
+        append("RHC," + testNumber + "," + optimal_score + ",1000," + trainingTime/Math.pow(10, 9), finals_path);
 
         start = System.nanoTime();
-        SimulatedAnnealing sa = new SimulatedAnnealing(100, .95, hcp, true, path);
+        SimulatedAnnealing sa = new SimulatedAnnealing(100, .95, hcp, true, testNumber, path);
         fit = new FixedIterationTrainer(sa, 1000);
         fit.train();
         end = System.nanoTime();
         trainingTime = end - start;
         optimal_score = ef.value(sa.getOptimal());
-        append("SA," + optimal_score + ",1000," + trainingTime/Math.pow(10, 9), finals_path);
+        append("SA," + testNumber + "," + optimal_score + ",1000," + trainingTime/Math.pow(10, 9), finals_path);
 
         start = System.nanoTime();
-        StandardGeneticAlgorithm ga = new StandardGeneticAlgorithm(20, 20, 0, gap, true, path);
+        StandardGeneticAlgorithm ga = new StandardGeneticAlgorithm(20, 20, 0, gap, true, testNumber, path);
         fit = new FixedIterationTrainer(ga, 300);
         fit.train();
         end = System.nanoTime();
         trainingTime = end - start;
         optimal_score = ef.value(ga.getOptimal());
-        append("GA," + optimal_score + ",300," + trainingTime/Math.pow(10, 9), finals_path);
+        append("GA," + testNumber + "," + optimal_score + ",300," + trainingTime/Math.pow(10, 9), finals_path);
 
         start = System.nanoTime();
-        MIMIC mimic = new MIMIC(50, 10, pop, true, path);
+        MIMIC mimic = new MIMIC(50, 10, pop, true, testNumber, path);
         fit = new FixedIterationTrainer(mimic, 100);
         fit.train();
         end = System.nanoTime();
         trainingTime = end - start;
         optimal_score = ef.value(mimic.getOptimal());
-        append("MIMIC," + optimal_score + ",100," + trainingTime/Math.pow(10, 9), finals_path);
+        append("MIMIC," + testNumber + "," + optimal_score + ",100," + trainingTime/Math.pow(10, 9), finals_path);
     }
 
     public static void append(String data, String path) {

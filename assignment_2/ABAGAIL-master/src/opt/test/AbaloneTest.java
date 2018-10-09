@@ -47,20 +47,20 @@ public class AbaloneTest {
         if(result_file.exists()) {
             result_file.delete();
         }
-        try {
-            append("algorithm,score", result_path);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        append("algorithm,run_num,score,bitstring", result_path);
 
         if(finals_file.exists()) {
             finals_file.delete();
         }
-        try {
-            append("algorithm,classified_correctly,classified_incorrectly,accuracy,training_time,test_time", finals_path);
-        } catch (Exception e) {
-            e.printStackTrace();
+        append("algorithm,run_num,score,iterations,training_time", finals_path);
+
+        for (int i = 0; i < 4; i++) {
+            oneRun(i);
         }
+    }
+
+
+    public static void oneRun(int testNumber) {
 
         for(int i = 0; i < oa.length; i++) {
             networks[i] = factory.createClassificationNetwork(
@@ -70,9 +70,9 @@ public class AbaloneTest {
 
         System.out.println("hello");
 
-        oa[0] = new RandomizedHillClimbing(nnop[0], true, result_path);
-        oa[1] = new SimulatedAnnealing(1E11, .95, nnop[1], true, result_path);
-        oa[2] = new StandardGeneticAlgorithm(200, 100, 10, nnop[2], true, result_path);
+        oa[0] = new RandomizedHillClimbing(nnop[0], true, testNumber, result_path);
+        oa[1] = new SimulatedAnnealing(1E11, .95, nnop[1], true, testNumber, result_path);
+        oa[2] = new StandardGeneticAlgorithm(200, 100, 10, nnop[2], true, testNumber, result_path);
 
         System.out.println("hello2");
 
@@ -172,11 +172,15 @@ public class AbaloneTest {
         return instances;
     }
 
-    public static void append(String data, String path) throws IOException{
-        FileWriter pw = new FileWriter(path, true);
-        pw.append(data);
-        pw.append("\n");
-        pw.flush();
-        pw.close();
+    public static void append(String data, String path) {
+        try {
+            FileWriter pw = new FileWriter(path, true);
+            pw.append(data);
+            pw.append("\n");
+            pw.flush();
+            pw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
