@@ -70,9 +70,9 @@ public class AbaloneTest {
 
         System.out.println("hello");
 
-        oa[0] = new RandomizedHillClimbing(nnop[0], true, testNumber, result_path);
-        oa[1] = new SimulatedAnnealing(1E11, .95, nnop[1], true, testNumber, result_path);
-        oa[2] = new StandardGeneticAlgorithm(200, 100, 10, nnop[2], true, testNumber, result_path);
+        oa[0] = new RandomizedHillClimbing(nnop[0], true, testNumber, 10, result_path);
+        oa[1] = new SimulatedAnnealing(1E11, .95, nnop[1], true, testNumber, 10, result_path);
+        oa[2] = new StandardGeneticAlgorithm(200, 100, 10, nnop[2], true, testNumber, 10, result_path);
 
         System.out.println("hello2");
 

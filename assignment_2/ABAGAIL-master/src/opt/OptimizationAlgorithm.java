@@ -40,6 +40,8 @@ public abstract class OptimizationAlgorithm implements Trainer {
      */
     public abstract Instance getOptimal();
 
+    public abstract void reset();
+
     public String instanceToString(Instance inst){
         Vector data = inst.getData();
         String bitstring = "";

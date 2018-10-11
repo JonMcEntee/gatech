@@ -45,6 +45,8 @@ public class StandardGeneticAlgorithm extends OptimizationAlgorithm {
     private int testNumber;
 
     private int iterNumber = 0;
+
+    private int bitSize;
     
     /**
      * The population
@@ -80,11 +82,12 @@ public class StandardGeneticAlgorithm extends OptimizationAlgorithm {
     }
 
     public StandardGeneticAlgorithm(int populationSize, int toMate, int toMutate, GeneticAlgorithmProblem gap,
-                                    boolean verbose, int testNumber, String path) {
+                                    boolean verbose, int testNumber, int bitSize, String path) {
         this(populationSize, toMate, toMutate, gap);
         this.verbose = verbose;
         this.path = path;
         this.testNumber = testNumber;
+        this.bitSize = bitSize;
     }
 
     /**
@@ -141,10 +144,10 @@ public class StandardGeneticAlgorithm extends OptimizationAlgorithm {
         values = newValues;
         if (verbose) {
             //System.out.println("GA: " + ga.value(getOptimal()));
-            append("GA," + this.testNumber + "," + iterNumber +  "," + (sum / populationSize) + "," + instanceToString(getOptimal()), path);
+            append("GA," + this.testNumber + "," + this.bitSize + iterNumber +  "," + (sum / populationSize) + "," + instanceToString(getOptimal()), path);
             iterNumber++;
         }
-        return sum / populationSize;
+        return ga.value(getOptimal());
     }
 
     /**
@@ -162,6 +165,18 @@ public class StandardGeneticAlgorithm extends OptimizationAlgorithm {
             }
         }
         return population[best];
+    }
+
+    public void reset() {
+        GeneticAlgorithmProblem gap = (GeneticAlgorithmProblem) getOptimizationProblem();
+        population = new Instance[populationSize];
+        for (int i = 0; i < population.length; i++) {
+            population[i] = gap.random();
+        }
+        values = new double[populationSize];
+        for (int i = 0; i < values.length; i++) {
+            values[i] = gap.value(population[i]);
+        }
     }
 
 }

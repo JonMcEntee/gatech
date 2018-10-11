@@ -31,6 +31,11 @@ public class SimulatedAnnealing extends OptimizationAlgorithm {
     private int iterNumber = 0;
 
     /**
+     * The temperature to start with
+     */
+    private double tValue;
+
+    /**
      * The current temperature
      */
     private double t;
@@ -39,6 +44,8 @@ public class SimulatedAnnealing extends OptimizationAlgorithm {
      * The cooling parameter
      */
     private double cooling;
+
+    private int bitSize;
     
     /**
      * Make a new simulated annealing hill climbing
@@ -50,17 +57,19 @@ public class SimulatedAnnealing extends OptimizationAlgorithm {
         super(hcp);
         this.verbose = false;
         this.t = t;
+        this.tValue = t;
         this.cooling = cooling;
         this.cur = hcp.random();
         this.curVal = hcp.value(cur);
     }
 
-    public SimulatedAnnealing(double t, double cooling, HillClimbingProblem hcp, boolean verbose, int testNumber,
+    public SimulatedAnnealing(double t, double cooling, HillClimbingProblem hcp, boolean verbose, int testNumber, int bitSize,
                               String path) {
         this(t, cooling, hcp);
         this.verbose = verbose;
         this.path = path;
         this.testNumber = testNumber;
+        this.bitSize = bitSize;
     }
 
     /**
@@ -78,7 +87,7 @@ public class SimulatedAnnealing extends OptimizationAlgorithm {
         t *= cooling;
         if (verbose) {
             //System.out.println("SA: " + curVal);
-            append("SA," + this.testNumber + "," + iterNumber + "," + curVal + "," + instanceToString(cur), path);
+            append("SA," + this.testNumber + "," + bitSize + "," + iterNumber + "," + curVal + "," + instanceToString(cur), path);
             iterNumber++;
         }
         return curVal;
@@ -89,6 +98,13 @@ public class SimulatedAnnealing extends OptimizationAlgorithm {
      */
     public Instance getOptimal() {
         return cur;
+    }
+
+    public void reset() {
+        HillClimbingProblem hcp = (HillClimbingProblem) getOptimizationProblem();
+        this.t = this.tValue;
+        this.cur = hcp.random();
+        this.curVal = hcp.value(cur);
     }
 
 }

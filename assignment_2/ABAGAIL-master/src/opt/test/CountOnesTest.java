@@ -16,17 +16,12 @@ import opt.NeighborFunction;
 import opt.RandomizedHillClimbing;
 import opt.SimulatedAnnealing;
 import opt.example.*;
-import opt.ga.CrossoverFunction;
-import opt.ga.DiscreteChangeOneMutation;
-import opt.ga.GenericGeneticAlgorithmProblem;
-import opt.ga.GeneticAlgorithmProblem;
-import opt.ga.MutationFunction;
-import opt.ga.StandardGeneticAlgorithm;
-import opt.ga.UniformCrossOver;
+import opt.ga.*;
 import opt.prob.GenericProbabilisticOptimizationProblem;
 import opt.prob.MIMIC;
 import opt.prob.ProbabilisticOptimizationProblem;
 import shared.FixedIterationTrainer;
+import shared.RandomResetIterationTrainer;
 
 /**
  * 
@@ -35,9 +30,8 @@ import shared.FixedIterationTrainer;
  */
 public class CountOnesTest {
     /** The n value */
-    private static final int N = 100;
 
-    private static final int ITER = 100;
+    private static final int ITER = 10;
 
     private static String path = "src/output/count_ones_results.csv";
 
@@ -47,70 +41,80 @@ public class CountOnesTest {
 
     private static File finals_file = new File(finals_path);
 
+    private static int BITSTARTSIZE = 20;
+
+    private static int BITENDSIZE = 60;
+
+    private static int BITINTERVAL = 10;
+
     public static void main(String[] args) {
         if(result_file.exists()) {
             result_file.delete();
         }
-        append("algorithm,run_num,iteration,score,bitstring", path);
+        append("algorithm,run_num,bitstring_size,iteration,score,bitstring", path);
 
         if(finals_file.exists()) {
             finals_file.delete();
         }
-        append("algorithm,run_num,score,iterations,training_time", finals_path);
+        append("algorithm,run_num,bitstring_size,score,iterations,training_time", finals_path);
 
         for (int i = 0; i < ITER; i++) {
-            oneRun(i);
+            for (int j = BITSTARTSIZE; j <= BITENDSIZE; j += BITINTERVAL) {
+                oneRun(i, j);
+            }
         }
     }
 
-    public static void oneRun(int testNumber) {
-        int[] ranges = new int[N];
+
+
+    public static void oneRun(int testNumber, int bitSize) {
+        int[] ranges = new int[bitSize];
         Arrays.fill(ranges, 2);
         EvaluationFunction ef = new CountOnesEvaluationFunction();
         Distribution odd = new DiscreteUniformDistribution(ranges);
         NeighborFunction nf = new DiscreteChangeOneNeighbor(ranges);
         MutationFunction mf = new DiscreteChangeOneMutation(ranges);
-        CrossoverFunction cf = new UniformCrossOver();
+        CrossoverFunction cf = new SingleCrossOver();
         Distribution df = new DiscreteDependencyTree(.1, ranges); 
         HillClimbingProblem hcp = new GenericHillClimbingProblem(ef, odd, nf);
         GeneticAlgorithmProblem gap = new GenericGeneticAlgorithmProblem(ef, odd, mf, cf);
         ProbabilisticOptimizationProblem pop = new GenericProbabilisticOptimizationProblem(ef, odd, df);
 
         double start = System.nanoTime(), end, trainingTime;
-        RandomizedHillClimbing rhc = new RandomizedHillClimbing(hcp, true, testNumber, path);
-        FixedIterationTrainer fit = new FixedIterationTrainer(rhc, 1000);
+        RandomizedHillClimbing rhc = new RandomizedHillClimbing(hcp, true, testNumber, bitSize, path);
+        RandomResetIterationTrainer fit = new RandomResetIterationTrainer(rhc, bitSize);
         fit.train();
         end = System.nanoTime();
         trainingTime = end - start;
         double optimal_score = ef.value(rhc.getOptimal());
-        append("RHC," + testNumber + "," + optimal_score + ",1000," + trainingTime/Math.pow(10, 9), finals_path);
+        append("RHC," + testNumber + "," + bitSize + "," + optimal_score + "," + fit.totalIterations + "," + trainingTime/Math.pow(10, 9), finals_path);
 
         start = System.nanoTime();
-        SimulatedAnnealing sa = new SimulatedAnnealing(100, .95, hcp, true, testNumber, path);
-        fit = new FixedIterationTrainer(sa, 1000);
+        SimulatedAnnealing sa = new SimulatedAnnealing(100, .95, hcp, true, testNumber, bitSize, path);
+        fit = new RandomResetIterationTrainer(sa, bitSize);
         fit.train();
         end = System.nanoTime();
         trainingTime = end - start;
         optimal_score = ef.value(sa.getOptimal());
-        append("SA," + testNumber + "," + optimal_score + ",1000," + trainingTime/Math.pow(10, 9), finals_path);
+        append("SA," + testNumber + "," + bitSize + "," + optimal_score + "," + fit.totalIterations + "," + trainingTime/Math.pow(10, 9), finals_path);
 
         start = System.nanoTime();
-        StandardGeneticAlgorithm ga = new StandardGeneticAlgorithm(20, 20, 0, gap, true, testNumber, path);
-        fit = new FixedIterationTrainer(ga, 300);
+        StandardGeneticAlgorithm ga = new StandardGeneticAlgorithm(200, 20, 20, gap, true, testNumber, bitSize, path);
+        fit = new RandomResetIterationTrainer(ga, bitSize, 2000, 100000);
         fit.train();
         end = System.nanoTime();
         trainingTime = end - start;
         optimal_score = ef.value(ga.getOptimal());
-        append("GA," + testNumber + "," + optimal_score + ",300," + trainingTime/Math.pow(10, 9), finals_path);
+        append("GA," + testNumber + "," + bitSize + "," + optimal_score + "," + fit.totalIterations + "," + trainingTime/Math.pow(10, 9), finals_path);
 
         start = System.nanoTime();
-        MIMIC mimic = new MIMIC(50, 10, pop, true, testNumber, path);
-        fit = new FixedIterationTrainer(mimic, 100);
+        MIMIC mimic = new MIMIC(50, 10, pop, true, testNumber, bitSize, path);
+        fit = new RandomResetIterationTrainer(mimic, bitSize);
         fit.train();
         end = System.nanoTime();
         trainingTime = end - start;
         optimal_score = ef.value(mimic.getOptimal());
-        append("MIMIC," + testNumber + "," + optimal_score + ",100," + trainingTime/Math.pow(10, 9), finals_path);
+        append("MIMIC," + testNumber + "," + bitSize + "," + optimal_score + "," + fit.totalIterations + "," + trainingTime/Math.pow(10, 9), finals_path);
     }
 
     public static void append(String data, String path) {

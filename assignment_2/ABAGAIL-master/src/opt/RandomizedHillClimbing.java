@@ -27,6 +27,8 @@ public class RandomizedHillClimbing extends OptimizationAlgorithm {
     private int testNumber;
 
     private int iterNumber = 0;
+
+    private int bitSize;
     
     /**
      * Make a new randomized hill climbing
@@ -38,11 +40,12 @@ public class RandomizedHillClimbing extends OptimizationAlgorithm {
         curVal = hcp.value(cur);
     }
 
-    public RandomizedHillClimbing(HillClimbingProblem hcp, boolean verbose, int testNumber, String path) {
+    public RandomizedHillClimbing(HillClimbingProblem hcp, boolean verbose, int testNumber, int bitSize, String path) {
         this(hcp);
         this.verbose = verbose;
         this.path = path;
         this.testNumber = testNumber;
+        this.bitSize = bitSize;
     }
 
     /**
@@ -58,8 +61,8 @@ public class RandomizedHillClimbing extends OptimizationAlgorithm {
         }
 
         if(verbose) {
-            // System.out.println("RHC: " + curVal);
-            append("RHC," + this.testNumber + "," + iterNumber + "," + curVal + "," + instanceToString(cur), path);
+            //System.out.println("RHC: " + curVal);
+            append("RHC," + this.testNumber + "," + this.bitSize + "," + iterNumber + "," + curVal + "," + instanceToString(cur), path);
             iterNumber++;
         }
         return curVal;
@@ -70,6 +73,12 @@ public class RandomizedHillClimbing extends OptimizationAlgorithm {
      */
     public Instance getOptimal() {
         return cur;
+    }
+
+    public void reset() {
+        HillClimbingProblem hcp = (HillClimbingProblem) getOptimizationProblem();
+        cur = hcp.random();
+        curVal = hcp.value(cur);
     }
 
 }

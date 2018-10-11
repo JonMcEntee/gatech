@@ -27,18 +27,18 @@ import opt.prob.GenericProbabilisticOptimizationProblem;
 import opt.prob.MIMIC;
 import opt.prob.ProbabilisticOptimizationProblem;
 import shared.FixedIterationTrainer;
+import shared.RandomResetIterationTrainer;
 
 /**
  * Copied from ContinuousPeaksTest
  * @version 1.0
  */
 public class FourPeaksTest {
-    /** The n value */
-    private static final int N = 100;
-    /** The t value */
-    private static final int T = N / 10;
 
-    private static final int ITER = 100;
+    /** The t value */
+    private static int T;
+
+    private static final int ITER = 10;
 
     private static String path = "src/output/four_peaks_results.csv";
 
@@ -48,24 +48,36 @@ public class FourPeaksTest {
 
     private static File finals_file = new File(finals_path);
 
+    private static int BITSTARTSIZE = 20;
+
+    private static int BITENDSIZE = 60;
+
+    private static int BITINTERVAL = 10;
+
+    private static int SCORE_THRESHOLD;
+
     public static void main(String[] args) {
         if(result_file.exists()) {
             result_file.delete();
         }
-        append("algorithm,run_num,iteration,score,bitstring", path);
+        append("algorithm,run_num,bitstring_size,iteration,score,bitstring", path);
 
         if(finals_file.exists()) {
             finals_file.delete();
         }
-        append("algorithm,run_num,score,iterations,training_time", finals_path);
+        append("algorithm,run_num,bitstring_size,score,iterations,training_time", finals_path);
 
         for (int i = 0; i < ITER; i++) {
-            oneRun(i);
+            for (int j = BITSTARTSIZE; j <= BITENDSIZE; j += BITINTERVAL) {
+                T = j / 10;
+                SCORE_THRESHOLD = 2*j - T - 1;
+                oneRun(i, j);
+            }
         }
     }
 
-    public static void oneRun(int testNumber) {
-        int[] ranges = new int[N];
+    public static void oneRun(int testNumber, int bitSize) {
+        int[] ranges = new int[bitSize];
         Arrays.fill(ranges, 2);
         EvaluationFunction ef = new FourPeaksEvaluationFunction(T);
         Distribution odd = new DiscreteUniformDistribution(ranges);
@@ -78,40 +90,40 @@ public class FourPeaksTest {
         ProbabilisticOptimizationProblem pop = new GenericProbabilisticOptimizationProblem(ef, odd, df);
 
         double start = System.nanoTime(), end, trainingTime;
-        RandomizedHillClimbing rhc = new RandomizedHillClimbing(hcp, true, testNumber, path);
-        FixedIterationTrainer fit = new FixedIterationTrainer(rhc, 10000);
+        RandomizedHillClimbing rhc = new RandomizedHillClimbing(hcp, true, testNumber, bitSize, path);
+        RandomResetIterationTrainer fit = new RandomResetIterationTrainer(rhc, SCORE_THRESHOLD);
         fit.train();
         end = System.nanoTime();
         trainingTime = end - start;
         double optimal_score = ef.value(rhc.getOptimal());
-        append("RHC," + testNumber + "," + optimal_score + ",20000," + trainingTime/Math.pow(10, 9), finals_path);
+        append("RHC," + testNumber + "," + bitSize + "," + optimal_score + "," + fit.totalIterations + "," + trainingTime/Math.pow(10, 9), finals_path);
 
         start = System.nanoTime();
-        SimulatedAnnealing sa = new SimulatedAnnealing(100, .95, hcp, true, testNumber, path);
-        fit = new FixedIterationTrainer(sa, 10000);
+        SimulatedAnnealing sa = new SimulatedAnnealing(100, .95, hcp, true, testNumber, bitSize, path);
+        fit = new RandomResetIterationTrainer(sa, SCORE_THRESHOLD);
         fit.train();
         end = System.nanoTime();
         trainingTime = end - start;
         optimal_score = ef.value(sa.getOptimal());
-        append("SA," + testNumber + "," + optimal_score + ",20000," + trainingTime/Math.pow(10, 9), finals_path);
+        append("SA," + testNumber + "," + bitSize + "," + optimal_score + "," + fit.totalIterations + "," + trainingTime/Math.pow(10, 9), finals_path);
 
         start = System.nanoTime();
-        StandardGeneticAlgorithm ga = new StandardGeneticAlgorithm(500, 100, 10, gap, true, testNumber, path);
-        fit = new FixedIterationTrainer(ga, 1000);
+        StandardGeneticAlgorithm ga = new StandardGeneticAlgorithm(500, 100, 10, gap, true, testNumber, bitSize, path);
+        fit = new RandomResetIterationTrainer(ga, SCORE_THRESHOLD);
         fit.train();
         end = System.nanoTime();
         trainingTime = end - start;
         optimal_score = ef.value(ga.getOptimal());
-        append("GA," + testNumber + "," + optimal_score + ",1000," + trainingTime/Math.pow(10, 9), finals_path);
+        append("GA," + testNumber + "," + bitSize + "," + optimal_score + "," + fit.totalIterations + "," + trainingTime/Math.pow(10, 9), finals_path);
 
         start = System.nanoTime();
-        MIMIC mimic = new MIMIC(200, 30, pop, true, testNumber, path);
-        fit = new FixedIterationTrainer(mimic, 1000);
+        MIMIC mimic = new MIMIC(200, 30, pop, true, testNumber, bitSize, path);
+        fit = new RandomResetIterationTrainer(mimic, SCORE_THRESHOLD);
         fit.train();
         end = System.nanoTime();
         trainingTime = end - start;
         optimal_score = ef.value(mimic.getOptimal());
-        append("MIMIC," + testNumber + "," + optimal_score + ",1000," + trainingTime/Math.pow(10, 9), finals_path);
+        append("MIMIC," + testNumber + "," + bitSize + "," + optimal_score + "," + fit.totalIterations + "," + trainingTime/Math.pow(10, 9), finals_path);
     }
 
     public static void append(String data, String path) {

@@ -35,6 +35,8 @@ public class MIMIC extends OptimizationAlgorithm {
 
     private int iterNumber = 0;
 
+    private int bitSize;
+
     /**
      * The number of samples to keep
      */
@@ -62,11 +64,12 @@ public class MIMIC extends OptimizationAlgorithm {
         distribution.estimate(new DataSet(data));
     }
 
-    public MIMIC(int samples, int tokeep, ProbabilisticOptimizationProblem op, boolean verbose, int testNumber, String path) {
+    public MIMIC(int samples, int tokeep, ProbabilisticOptimizationProblem op, boolean verbose, int testNumber, int bitSize, String path) {
         this(samples, tokeep, op);
         this.verbose = verbose;
         this.path = path;
         this.testNumber = testNumber;
+        this.bitSize = bitSize;
     }
 
     /**
@@ -115,12 +118,24 @@ public class MIMIC extends OptimizationAlgorithm {
             }
         }
         distribution.estimate(new DataSet(kept));
+
+        double optimalValue = op.value(getOptimal());
         if (verbose) {
-            //System.out.println("MIMIC: " + op.value(getOptimal()));
-            append("MIMIC," + this.testNumber + "," + iterNumber + "," + cutoff + "," + instanceToString(getOptimal()), path);
+            //System.out.println("MIMIC: " + optimalValue);
+            append("MIMIC," + this.testNumber + "," + this.bitSize + "," + iterNumber + "," + optimalValue + "," + instanceToString(getOptimal()), path);
             iterNumber++;
         }
-        return cutoff;
+        return optimalValue;
+    }
+
+    public void reset() {
+        ProbabilisticOptimizationProblem op = (ProbabilisticOptimizationProblem) getOptimizationProblem();
+        Instance[] data = new Instance[samples];
+        for (int i = 0; i < data.length; i++) {
+            data[i] = op.random();
+        }
+        distribution = op.getDistribution();
+        distribution.estimate(new DataSet(data));
     }
 
 }
