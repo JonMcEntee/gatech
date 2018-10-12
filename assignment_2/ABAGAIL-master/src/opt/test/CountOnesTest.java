@@ -39,11 +39,11 @@ public class CountOnesTest {
 
     private static final int ITER = 100;
 
-    private static String path = "src/output/count_ones_results.csv";
+    private static String path = "output/count_ones_results.csv";
 
     private static File result_file = new File(path);
 
-    private static String finals_path = "src/output/count_ones_finals.csv";
+    private static String finals_path = "output/count_ones_finals.csv";
 
     private static File finals_file = new File(finals_path);
 

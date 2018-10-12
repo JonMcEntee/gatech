@@ -37,10 +37,10 @@ public class AbaloneTest {
     private static String results = "";
 
     private static DecimalFormat df = new DecimalFormat("0.000");
-    private static String result_path = "src/output/abalone_results.csv";
+    private static String result_path = "output/abalone_results.csv";
     private static File result_file = new File(result_path);
 
-    private static String finals_path = "src/output/abalone_finals.csv";
+    private static String finals_path = "output/abalone_finals.csv";
     private static File finals_file = new File(finals_path);
 
     public static void main(String[] args) {

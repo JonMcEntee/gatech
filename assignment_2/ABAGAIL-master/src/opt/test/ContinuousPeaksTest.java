@@ -42,11 +42,11 @@ public class ContinuousPeaksTest {
 
     private static final int ITER = 100;
 
-    private static String path = "src/output/continuous_peaks_results.csv";
+    private static String path = "output/continuous_peaks_results.csv";
 
     private static File result_file = new File(path);
 
-    private static String finals_path = "src/output/continuous_peaks_finals.csv";
+    private static String finals_path = "output/continuous_peaks_finals.csv";
 
     private static File finals_file = new File(finals_path);
 

@@ -40,11 +40,11 @@ public class FourPeaksTest {
 
     private static final int ITER = 100;
 
-    private static String path = "src/output/four_peaks_results.csv";
+    private static String path = "output/four_peaks_results.csv";
 
     private static File result_file = new File(path);
 
-    private static String finals_path = "src/output/four_peaks_finals.csv";
+    private static String finals_path = "output/four_peaks_finals.csv";
 
     private static File finals_file = new File(finals_path);
 
