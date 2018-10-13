@@ -95,7 +95,7 @@ public class CountOnesTest {
         append("SA," + testNumber + "," + optimal_score + ",1000," + trainingTime/Math.pow(10, 9), finals_path);
 
         start = System.nanoTime();
-        StandardGeneticAlgorithm ga = new StandardGeneticAlgorithm(20, 20, 0, gap, true, testNumber, path);
+        StandardGeneticAlgorithm ga = new StandardGeneticAlgorithm(200, 20, 20, gap, true, testNumber, path);
         fit = new FixedIterationTrainer(ga, 300);
         fit.train();
         end = System.nanoTime();

@@ -49,7 +49,7 @@ public class FlipFlopTest {
 
     private static int BITSTARTSIZE = 20;
 
-    private static int BITENDSIZE = 50;
+    private static int BITENDSIZE = 100;
 
     private static int BITINTERVAL = 10;
 

@@ -10,7 +10,7 @@ mv output master_output
 
 mkdir output
 
-export CLASSPATH=ABAGAIL-looping/ABAGAIL-looping.jar:$OLD_CLASSPATH
+export CLASSPATH=ABAGAIL-looping/ABAGAIL.jar:$OLD_CLASSPATH
 
 java opt.test.RunAll
 

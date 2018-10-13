@@ -50,7 +50,7 @@ public class ContinuousPeaksTest {
 
     private static int BITSTARTSIZE = 20;
 
-    private static int BITENDSIZE = 60;
+    private static int BITENDSIZE = 100;
 
     private static int BITINTERVAL = 10;
 

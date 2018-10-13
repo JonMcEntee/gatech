@@ -16,6 +16,7 @@ library(tidyverse)
 library(extrafont)
 library(grid)
 library(gridExtra)
+library(lattice)
 
 adult_results <- read_csv("results/adult_results.csv")
 adult_finals <- read_csv("results/adult_finals.csv")
@@ -45,6 +46,7 @@ plot_data <- function(df, title=NULL, subtitle=NULL,
   df %>%
     group_by(algorithm) %>%
     mutate(x = iteration / n()) %>%
+    # filter(iteration %in% seq(1, n(), round(n()/10) - 1)) %>%
     ungroup() %>%
     ggplot(aes(x = x, y = score, color = algorithm)) +
     geom_line() +
@@ -94,10 +96,11 @@ plot_time_iterations <- function(df, title) {
     )
   
   p2 <- new_data %>%
-    ggplot(aes(x = bitstring_size, y = iterations, fill = algorithm)) +
+    ggplot(aes(x = bitstring_size, y = iterations, color = algorithm)) +
     theme_minimal() +
-    geom_bar(stat = "identity", position = "dodge", width = 4) +
-    guides(fill = FALSE) +
+    geom_line() +
+    geom_point() +
+    guides(color = FALSE) +
     labs(x = NULL) +
     scale_y_continuous(position = "right") +
     theme(
@@ -174,35 +177,35 @@ adult_finals %>%
 
 # The "Count Ones" Problem
 
-The "count ones" problem, as the name suggests, is an optimization problem on bitstrings where the evaluation function simply counts the number of ones in the bitstring. The more ones, the higher its fitness score. For example, if the bit strings were 5 bits long, then a string 10111 would be given a score of 4. The order of the bits plays no importance, so 11101 would recieve the same score.
+The "count ones" problem, as the name suggests, is an optimization problem on bitstrings where the evaluation function simply counts the number of ones in the bitstring. The more ones, the higher its fitness score. For example, if the bit strings were 5 bits long, then a string `10111` would be given a score of 4. The order of the bits plays no importance, so `11101` would recieve the same score.
 
 Because the evaluation function doesn't account for the order of the bits, there are no conditional dependencies between them. So we would expect MIMIC and genetic algorithms to have no particular advantage against truly structureless optimization algorithms like randomized hill climbing and simulated annealing.
 
-There is also only one optimum in this problem, so the randomized hill climbing algorithm will not get "stuck" at local optima. What do I mean by this? Consider the randomized hill climbing algorithm's neighbor function in ABAGAIL. The neighbor of the randomized hill climbing algorithm's current bitsrting is that same bitstring but with one randomly selected bit changed. So the string 10010 has the neighbors 00010, 11010, 10110, 10000, and 10011. This means that for any suboptimal bit string, there will always be a neighbor that improves the fitness score.
+There is also only one optimum in this problem, so the randomized hill climbing algorithm will not get "stuck" at local optima. What do I mean by this? Consider the randomized hill climbing algorithm's neighbor function in ABAGAIL. The neighbor of the randomized hill climbing algorithm's current bitsrting is that same bitstring but with one randomly selected bit changed. So the string `10010` has the neighbors `00010`, `11010`, `10110`, `10000`, and `10011`. This means that for any suboptimal bit string, there will always be a neighbor that improves the fitness score. With no local optimums to be trapped in, simulated annealing shouldn't have any advantage over randomized hill climbing either.
 
-With no local optimums to be trapped in, simulated annealing shouldn't have any advantage over randomized hill climbing either.
+I ran all four algorithms against solving the count ones problem on bitstrings of length 20, 30, 40, 50, and 60, ten times each. Algorithms which saw no increase in score for more than 2000 iterations recieved a random reset. The algorithms were run until they reached a perfect fitness score.
 
-```{r, fig.width=6, fig.height=3, message=FALSE, fig.align="center"}
-count_ones_results %>%
-  filter(run_num == 3) %>%
-  mutate(score = as.double(score)) %>%
-  plot_data(
-    title = 'The "Count Ones" Problem',
-    xlab = "Iterations",
-    ylab = "Score")
-```
-
-I ran all four algorithms against solving the count ones problem with 100-bit long bitstrings 100 times. On average, randomized hill climbing performed the best. Simulated annealing was second best, followed by MIMIC. The genetic algorithm performed the worst. In fact, it performed much worse. While the other three algorithms averaged in the high 90s (the highest score being 100), the genetic algorithm averaged 59 points. Why?
-
-It's unlikely to be the mutation function, which is identical to the neighbor function for randomized hill climbing and simulated annealing in this test. One possibility is that the discrete uniform crossover function applied to the genetic algorithm is ill-suited for the count ones problem. The function takes the two parent bitstrings, and for each bit of the child bitstring chooses the existing bit from one of its parents, with a 50-50 chance of choosing one or the other.
-
-Suppose our genetic algorithm reaches a point where on average, its population has 50 points. That means the "average"" bitstring in the population has 25 ones and 25 zeros. Which furthermore means the "average"" mutation operation is combining two bitstrings that are 50 percent zero and 50 percent ones. So each bit in the child bitstring will on average have a 50 percent chance of being a one or a zero.
-
-With this in mind, we can see that the bitstrings being generated by the mutation function are something like a binomial distribution where $p = 0.5$. And the most likely outcome is that it will produce another bitstring with 50% ones and 50% zeros, or something close. With the selection phase throwing out those bitstrings with lower scores, the GA *should* be able to eventually pull its score up. However it's easy to see how the genetic algorithm could get "stuck" on the count ones problem.
+Simulated annealing's temperature was initially set to 100 with a cooling factor of 0.95. The genetic algorithm had a population of 200 bitstrings. Each iteration, 20 bitstrings in the new population were generated from a discrete uniform crossover function. Another 20 were put through a mutation function that was equivalent to the random step used in simulated annealing and randomized hill climbing. MIMIC was set to take 50 samples from its distribution and keep 10 each iteration.
 
 ```{r, fig.width=6, fig.height=3, message=FALSE, fig.align="center"}
 plot_time_iterations(count_ones_iterations,
                      title = 'Iteration/Time on "Count Ones" To Reach Perfect Score')
+```
+
+In terms of training time, randomized hill climbing and simulated annealing reached a perfect score in the smallest amount of time on larger strings. the genetic algorithm, and MIMIC were third and fourth fastest respectively. This is what we expected. Both MIMIC and the genetic algorithm run slower, but have the advantage of being able to capture the structure of a bitstring. Here there is no structure, and the additional time cost required to capture structure becomes a disadvantage.
+
+However MIMIC required the least number of iterations to find the perfect score, followed by randomized hill climbing, simulated annealing, and the genetic algorithm. If the evaluation function had a higher time cost, MIMIC would theoretically be able to beat out randomized hill climbing and simulated annealing.
+
+To get a better understanding of how these algorithms trained, iteration by iteration, I ran the algorithms again to solve a 100 length bitstring, 100 times. Randomized hill climbing and simulated annealing were run for 1000 iterations, the genetic algorithm was run for 300 iterations, and MIMIC 100.
+
+```{r, fig.width=6, fig.height=3, message=FALSE, fig.align="center"}
+count_ones_results %>%
+  filter(run_num == 32) %>%
+  plot_data(
+    title = 'The "Count Ones" Problem',
+    subtitle = "(Run 32 Of 100)",
+    xlab = "Iterations",
+    ylab = "Score")
 ```
 
 ```{r}
@@ -230,31 +233,73 @@ count_ones_finals %>%
   knitr::kable()
 ```
 
-# Solving The "Flip Flop" Problem With Randomized Optimization
 
-```{r, fig.width=6, fig.height=3, message=FALSE, fig.align="center"}
-flip_flop_results %>%
-  filter(run_num == 4) %>%
-  plot_data(
-    title = "The 'Flip Flop' Problem",
-    xlab = "Iterations",
-    ylab = "Score")
+
+# The "Continuous Peaks" Problem
+
+The continuous peaks problem is another bitstring problem. Unlike count ones, continuous peaks has an evaluation function that increases with the longest continuous string of ones or zeros. If the longest string of ones and the longest string of zeros both are longer than some parameter $T = N/10$ where $N$ is the length of the bitstring, then a bonus of $N$ points will be added to the score. Put precisely:
+
+$$score = max(num_0(b), num_1(b)) + R(b)$$
+
+Where $num_0(b)$ and $num_1(b)$ is the length of the longest continuous string of zeros and ones in bitstring b, and
+
+$$R(b) =  \begin{cases} 
+      length(b) & num_0(b) > T\ and\ num_1(b) > T \\ 
+      0 & otherwise
+   \end{cases}$$ \newline
+   
+```{r, fig.width=6, fig.height=3, message=FALSE, warning=FALSE, fig.align="center"}
+g <- expand.grid(x = seq(1, 10, 0.5), y = seq(1, 10, 0.5))
+
+continous_peaks_lower <- function(x, y) {
+  if (x > 2 && y > 2) {
+    return(max(x, y) + 10)
+  } else if (x + y <= 10) {
+    return(max(x, y))
+  } else {
+    return(NA)
+  }
+}
+
+continuous_peaks <- function(x, y) {
+  z <- double(length = length(x))
+  for (i in seq(length(x))) {
+    z[i] <- continous_peaks_lower(x[i], y[i])
+  }
+  
+  return(z)
+}
+
+g$z <- continuous_peaks(g$x, g$y)
+
+textify <- function(title, font_size = 12, font_face = NULL) {
+  textGrob(title, gp = gpar(fontfamily = "CMU Serif", fontsize = font_size, fontface = font_face))
+}
+
+wireframe(z ~ x * y, data = g,
+          scales = list(arrows = FALSE),
+          drape = TRUE, colorkey = TRUE,
+          screen = list(z = 30, x = -60),
+          xlab = textify("zeros"),
+          ylab = textify("ones"),
+          zlab = textify("fit"),
+          main = textGrob("Continous Peaks Evaluation Function", x = .03, hjust = 0.1,
+                          gp = gpar(fontfamily = "CMU Serif", fontsize = 14, fontface = "bold")))
+
 ```
 
-```{r, fig.width=6, fig.height=3, message=FALSE, fig.align="center"}
-plot_time_iterations(flip_flop_iterations %>% filter(algorithm != "RHC"),
-                     title = 'Iteration/Time on "Flip Flop" To Reach Perfect Score')
-```
-
+I again ran all four
 
 ```{r, fig.width=6, fig.height=3, message=FALSE, fig.align="center"}
 continuous_peaks_results %>%
-  filter(run_num == 4) %>%
+  filter(run_num == 0, bitstring_size == 40) %>%
   plot_data(
     title = "The 'Continuous Peaks' Problem",
     xlab = "Iterations",
     ylab = "Error")
 ```
+
+
 
 ```{r, fig.width=6, fig.height=3, message=FALSE, fig.align="center"}
 plot_time_iterations(continuous_peaks_iterations,
@@ -286,6 +331,29 @@ continuous_peaks_finals %>%
   knitr::kable()
 ```
 
+# Solving The "Flip Flop" Problem With Randomized Optimization
+
+In the flip flop problem, the fitness function rewards bitstrings that alternate between zero and one. For example, `01010` is a global optimum for $N=5$. This gives the bits value relative to the bits surrounding it. A one preceded and followed by a one has zero fitness, but a one preceded and followed by a zero has two fitness.
+
+This is the kind of structure that should be captured well by a genetic algorithm and especially MIMIC. Furthermore, unlike count ones, flip flop has local optima that an algorithm like randomized hill climbing could get trapped in. `10110` has no neighboring bitstrings which increase the fitness. These local optimums are avoided by simulated annealing, which can roll over them when its temperature is high.
+
+I ran all four algorithms, set to random restart after 2000 iterations with no improvement. The randomized hill climbing algorithm was not able to converge to the perfect score within 100,000 iterations and thus is removed from the results below.
+
+```{r, fig.width=6, fig.height=3, message=FALSE, fig.align="center"}
+plot_time_iterations(flip_flop_iterations %>% filter(algorithm != "RHC"),
+                     title = 'Iteration/Time on "Flip Flop" To Reach Perfect Score')
+```
+
+In terms of training time, the simulated annealing algorithm beat out both the genetic algorithm and MIMIC. While MIMIC wins in iterations, as it did with the count ones problem, the cost of checking the evaluation function is so low that simulated annealing can blaze through thousands of iterations a second. To get a more detailed look at how the algorithms trained, I again looked at 
+
+```{r, fig.width=6, fig.height=3, message=FALSE, fig.align="center"}
+flip_flop_results %>%
+  filter(run_num == 4) %>%
+  plot_data(
+    title = "The 'Flip Flop' Problem",
+    xlab = "Iterations",
+    ylab = "Score")
+```
 
 ```{r, fig.width=6, fig.height=3, message=FALSE, fig.align="center"}
 four_peaks_results %>%

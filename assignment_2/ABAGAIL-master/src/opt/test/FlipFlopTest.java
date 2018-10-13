@@ -37,7 +37,7 @@ public class FlipFlopTest {
     /** The n value */
     private static final int N = 100;
 
-    private static final int ITER = 100;
+    private static final int ITER = 50;
 
     private static String path = "output/flip_flop_results.csv";
 

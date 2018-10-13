@@ -38,7 +38,7 @@ public class FourPeaksTest {
     /** The t value */
     private static final int T = N / 10;
 
-    private static final int ITER = 100;
+    private static final int ITER = 50;
 
     private static String path = "output/four_peaks_results.csv";
 

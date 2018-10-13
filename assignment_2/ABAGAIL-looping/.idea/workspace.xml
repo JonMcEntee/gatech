@@ -3,23 +3,12 @@
   <component name="ChangeListManager">
     <list default="true" id="3cb99294-126e-4233-b3d9-98804dfb2a6c" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/opt/test/AbaloneTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/opt/test/AbaloneTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/opt/test/ContinuousPeaksTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/opt/test/ContinuousPeaksTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/opt/test/CountOnesTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/opt/test/CountOnesTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/opt/test/FlipFlopTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/opt/test/FlipFlopTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/opt/test/FourPeaksTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/opt/test/FourPeaksTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../ABAGAIL-master/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../ABAGAIL-master/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ABAGAIL-master/ABAGAIL.jar" beforeDir="false" afterPath="$PROJECT_DIR$/../ABAGAIL-master/ABAGAIL.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ABAGAIL-master/bin/opt/test/AbaloneTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/../ABAGAIL-master/bin/opt/test/AbaloneTest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ABAGAIL-master/bin/opt/test/ContinuousPeaksTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/../ABAGAIL-master/bin/opt/test/ContinuousPeaksTest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ABAGAIL-master/bin/opt/test/CountOnesTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/../ABAGAIL-master/bin/opt/test/CountOnesTest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ABAGAIL-master/bin/opt/test/FlipFlopTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/../ABAGAIL-master/bin/opt/test/FlipFlopTest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ABAGAIL-master/bin/opt/test/FourPeaksTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/../ABAGAIL-master/bin/opt/test/FourPeaksTest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ABAGAIL-master/src/opt/test/AbaloneTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../ABAGAIL-master/src/opt/test/AbaloneTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ABAGAIL-master/src/opt/test/ContinuousPeaksTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../ABAGAIL-master/src/opt/test/ContinuousPeaksTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ABAGAIL-master/src/opt/test/CountOnesTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../ABAGAIL-master/src/opt/test/CountOnesTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ABAGAIL-master/src/opt/test/FlipFlopTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../ABAGAIL-master/src/opt/test/FlipFlopTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ABAGAIL-master/src/opt/test/FourPeaksTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../ABAGAIL-master/src/opt/test/FourPeaksTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../assignment2.Rmd" beforeDir="false" afterPath="$PROJECT_DIR$/../assignment2.Rmd" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/bin/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -149,6 +138,36 @@
         </counts>
       </usages-collector>
     </session>
+    <session id="-73291573">
+      <usages-collector id="statistics.lifecycle.project">
+        <counts>
+          <entry key="project.closed" value="2" />
+          <entry key="project.open.time.2" value="1" />
+          <entry key="project.open.time.9" value="1" />
+          <entry key="project.opened" value="2" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.open">
+        <counts>
+          <entry key="java" value="2" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.open">
+        <counts>
+          <entry key="JAVA" value="2" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.edit">
+        <counts>
+          <entry key="java" value="9" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.edit">
+        <counts>
+          <entry key="JAVA" value="9" />
+        </counts>
+      </usages-collector>
+    </session>
   </component>
   <component name="FavoritesManager">
     <favorites_list name="ABAGAIL" />
@@ -156,10 +175,50 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/opt/test/AbaloneTest.java">
+        <entry file="file://$PROJECT_DIR$/src/opt/test/ContinuousPeaksTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
-              <caret line="42" column="41" selection-start-line="42" selection-start-column="41" selection-end-line="42" selection-end-column="41" />
+            <state relative-caret-position="126">
+              <caret line="52" column="38" selection-start-line="52" selection-start-column="38" selection-end-line="52" selection-end-column="38" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/opt/example/ContinuousPeaksEvaluationFunction.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="539">
+              <caret line="38" column="9" selection-start-line="38" selection-start-column="9" selection-end-line="38" selection-end-column="9" />
+              <folding>
+                <element signature="e#489#490#0" expanded="true" />
+                <element signature="e#515#516#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/opt/test/CountOnesTest.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="225">
+              <caret line="45" column="38" selection-start-line="45" selection-start-column="38" selection-end-line="45" selection-end-column="38" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/opt/test/FlipFlopTest.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="296">
+              <caret line="91" column="35" selection-start-line="91" selection-start-column="8" selection-end-line="91" selection-end-column="35" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/shared/RandomResetIterationTrainer.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-449">
+              <caret line="10" column="13" selection-start-line="10" selection-start-column="13" selection-end-line="10" selection-end-column="13" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -168,46 +227,10 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/opt/test/ContinuousPeaksTest.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="285">
-              <caret line="46" column="41" selection-start-line="46" selection-start-column="41" selection-end-line="46" selection-end-column="41" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/opt/test/CountOnesTest.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="270">
-              <caret line="39" column="41" selection-start-line="39" selection-start-column="41" selection-end-line="39" selection-end-column="41" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/opt/test/FlipFlopTest.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="315">
-              <caret line="48" selection-start-line="48" selection-end-line="48" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/opt/test/FourPeaksTest.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="375">
-              <caret line="52" column="39" lean-forward="true" selection-start-line="52" selection-start-column="39" selection-end-line="52" selection-end-column="39" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/opt/prob/MIMIC.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="788">
-              <caret line="123" column="14" selection-start-line="123" selection-start-column="14" selection-end-line="123" selection-end-column="14" />
+              <caret line="52" column="38" selection-start-line="52" selection-start-column="38" selection-end-line="52" selection-end-column="38" />
             </state>
           </provider>
         </entry>
@@ -215,7 +238,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/opt/ga/StandardGeneticAlgorithm.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="788">
+            <state relative-caret-position="2100">
               <caret line="145" column="14" selection-start-line="145" selection-start-column="14" selection-end-line="145" selection-end-column="14" />
             </state>
           </provider>
@@ -224,7 +247,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/opt/SimulatedAnnealing.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="788">
+            <state relative-caret-position="1275">
               <caret line="88" column="14" selection-start-line="88" selection-start-column="14" selection-end-line="88" selection-end-column="14" />
             </state>
           </provider>
@@ -295,19 +318,18 @@
         <option value="$PROJECT_DIR$/src/opt/SimulatedAnnealing.java" />
         <option value="$PROJECT_DIR$/src/opt/ga/StandardGeneticAlgorithm.java" />
         <option value="$PROJECT_DIR$/src/opt/prob/MIMIC.java" />
-        <option value="$PROJECT_DIR$/src/opt/test/ContinuousPeaksTest.java" />
         <option value="$PROJECT_DIR$/src/opt/test/AbaloneTest.java" />
-        <option value="$PROJECT_DIR$/src/opt/test/CountOnesTest.java" />
         <option value="$PROJECT_DIR$/src/opt/test/FourPeaksTest.java" />
+        <option value="$PROJECT_DIR$/src/opt/test/CountOnesTest.java" />
+        <option value="$PROJECT_DIR$/src/opt/test/ContinuousPeaksTest.java" />
         <option value="$PROJECT_DIR$/src/opt/test/FlipFlopTest.java" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="x" value="382" />
-    <option name="y" value="266" />
-    <option name="width" value="1919" />
-    <option name="height" value="957" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="y" value="23" />
+    <option name="width" value="1440" />
+    <option name="height" value="797" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -344,8 +366,8 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
       <pane id="PackagesPane" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -458,9 +480,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="382" y="266" width="1919" height="957" extended-state="0" />
+    <frame x="0" y="23" width="1440" height="797" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49886364" visible="true" weight="0.20138519" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49886364" visible="true" weight="0.2067239" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -469,7 +492,7 @@
       <window_info id="Favorites" order="6" sideWeight="0.50113636" side_tool="true" weight="0.24231844" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32970297" />
-      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.21734104" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.23829788" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.35028902" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -708,13 +731,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_161.jdk/Contents/Home/src.zip!/java/io/Serializable.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2175">
-          <caret line="168" column="17" selection-start-line="168" selection-start-column="17" selection-end-line="168" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_161.jdk/Contents/Home/src.zip!/java/io/Serializable.java" />
     <entry file="file://$PROJECT_DIR$/src/dist/DiscreteUniformDistribution.java">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -791,27 +808,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/shared/RandomResetIterationTrainer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-12">
-          <caret line="29" column="17" lean-forward="true" selection-start-line="29" selection-start-column="17" selection-end-line="29" selection-end-column="17" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/opt/example/ContinuousPeaksEvaluationFunction.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="21" column="11" selection-start-line="21" selection-start-column="11" selection-end-line="21" selection-end-column="11" />
-          <folding>
-            <element signature="e#489#490#0" expanded="true" />
-            <element signature="e#515#516#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/opt/example/FourPeaksEvaluationFunction.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="187">
@@ -830,16 +826,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/opt/RandomizedHillClimbing.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="930">
-          <caret line="63" column="14" selection-start-line="63" selection-start-column="14" selection-end-line="63" selection-end-column="14" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/opt/test/AbaloneTest.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
+        <state relative-caret-position="495">
           <caret line="42" column="41" selection-start-line="42" selection-start-column="41" selection-end-line="42" selection-end-column="41" />
           <folding>
             <element signature="imports" expanded="true" />
@@ -849,22 +838,61 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/opt/prob/MIMIC.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="788">
+        <state relative-caret-position="1770">
           <caret line="123" column="14" selection-start-line="123" selection-start-column="14" selection-end-line="123" selection-end-column="14" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/opt/ga/StandardGeneticAlgorithm.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="788">
+        <state relative-caret-position="2100">
           <caret line="145" column="14" selection-start-line="145" selection-start-column="14" selection-end-line="145" selection-end-column="14" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/opt/SimulatedAnnealing.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="788">
+        <state relative-caret-position="1275">
           <caret line="88" column="14" selection-start-line="88" selection-start-column="14" selection-end-line="88" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/opt/RandomizedHillClimbing.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="930">
+          <caret line="63" column="14" selection-start-line="63" selection-start-column="14" selection-end-line="63" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/opt/example/ContinuousPeaksEvaluationFunction.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="539">
+          <caret line="38" column="9" selection-start-line="38" selection-start-column="9" selection-end-line="38" selection-end-column="9" />
+          <folding>
+            <element signature="e#489#490#0" expanded="true" />
+            <element signature="e#515#516#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/opt/test/FourPeaksTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="375">
+          <caret line="52" column="38" selection-start-line="52" selection-start-column="38" selection-end-line="52" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/opt/test/ContinuousPeaksTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="126">
+          <caret line="52" column="38" selection-start-line="52" selection-start-column="38" selection-end-line="52" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/opt/test/CountOnesTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="45" column="38" selection-start-line="45" selection-start-column="38" selection-end-line="45" selection-end-column="38" />
         </state>
       </provider>
     </entry>
@@ -878,31 +906,20 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/opt/test/ContinuousPeaksTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="46" column="41" selection-start-line="46" selection-start-column="41" selection-end-line="46" selection-end-column="41" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/opt/test/CountOnesTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="39" column="41" selection-start-line="39" selection-start-column="41" selection-end-line="39" selection-end-column="41" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/opt/test/FlipFlopTest.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="48" selection-start-line="48" selection-end-line="48" />
+        <state relative-caret-position="296">
+          <caret line="91" column="35" selection-start-line="91" selection-start-column="8" selection-end-line="91" selection-end-column="35" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/opt/test/FourPeaksTest.java">
+    <entry file="file://$PROJECT_DIR$/src/shared/RandomResetIterationTrainer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="375">
-          <caret line="52" column="39" lean-forward="true" selection-start-line="52" selection-start-column="39" selection-end-line="52" selection-end-column="39" />
+        <state relative-caret-position="-449">
+          <caret line="10" column="13" selection-start-line="10" selection-start-column="13" selection-end-line="10" selection-end-column="13" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
