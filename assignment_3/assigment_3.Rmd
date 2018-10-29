@@ -1,0 +1,110 @@
+---
+title: "Machine Learning - Assignment 3"
+author: "Jonathan McEntee"
+date: "10/29/2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(extrafont)
+library(tidyverse)
+library(tidyquant)
+library(forcats)
+
+nn_baseline_mean <- read_csv("nn_baseline_2_adult.csv") %>%
+  select(num_layers, mean_test_score, mean_train_score) %>%
+  gather(score_type, score, mean_test_score, mean_train_score) %>%
+  mutate(score_type = recode(score_type, mean_test_score = "test", mean_train_score = "train"))
+
+nn_baseline_sd <- read_csv("nn_baseline_2_adult.csv") %>%
+  select(num_layers, std_test_score, std_train_score) %>%
+  gather(score_type, score_sd, std_test_score, std_train_score) %>%
+  mutate(score_type = recode(score_type, std_test_score = "test", std_train_score = "train"))
+
+nn_baseline <- left_join(nn_baseline_mean, nn_baseline_sd, by = c("num_layers", "score_type")) %>%
+  mutate(
+    lower_bound = score - 1.96 * score_sd,
+    upper_bound = score + 1.96 * score_sd
+  )
+
+cluster_metrics_adult <- read_csv("cluster_metrics_adult.csv") %>%
+  select(k, model, adj_mutual_info, adj_rand, silhouette, v_measure) %>%
+  gather(score_type, score, adj_mutual_info:v_measure)
+```
+
+# The Adult Dataset
+
+The Adult dataset has 32,000+ samples and features for each adult including their age, sex, race, etc. Our objective is to predict whether each adult has an income of greater or less than $50,000, making this a binary classification problem. In assignment 1, using the scikit-learn library for Python, I ran a 6000 instance subsample of the dataset on a neural network classifier with a single layer of 90 nodes. I was able to achieve an accuracy of 79.3% on my test set. For this assignment I again used a 6000 instance subsample of the data, but also used a random forest classifier to evaluate the importance of each feature. Since many of the features are one hot encoded, which I feared would interfere with clustering, I reduced the number of features to the 40 most important, and scaled so that no feature would be weighted more heavily than the others. To have a baseline to compare the results of my cluster analysis to, I reran the neural network on this transformed dataset. I also re-performed my complexity analysis to insure the optimal number of nodes in my single layer. \linebreak
+
+```{r, fig.width=6, fig.height=2.5, message=FALSE, warning=FALSE, fig.align="center"}
+nn_baseline %>%
+  mutate(
+    score_type = recode(score_type,
+                        test = "Cross Validation",
+                        train = "Train")
+  ) %>%
+  ggplot(aes(x = num_layers)) +
+  geom_line(aes(y = score, color = score_type)) +
+  geom_point(aes(y = score, color = score_type)) +
+  geom_ribbon(aes(ymin = lower_bound, ymax = upper_bound, fill = score_type), alpha = 0.3) +
+  theme_minimal() +
+  theme(
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor.x = element_blank(),
+      text = element_text(size = 10, family = "CMU Serif"),
+      plot.title = element_text(face = "bold"),
+      legend.position = c(0,1),
+      legend.justification =  c(0,1)
+    ) +
+  labs(
+    title = "Neural Network Learning Curve",
+    x = "Number Of Nodes",
+    y = "Accuracy",
+    color = NULL,
+    fill = NULL
+    )
+```
+
+As the cross-validation score did not seem to improve with more nodes, I reduced the number of nodes to 5.
+
+## Cluster Analysis With K-Means and Expectation Maximization
+
+Using the scikit-learn library for Python, I ran the feature-reduced, subsampled data set through both a k-means and an expectation maximization algorithm. To evaluate the quality of the clustering algorithms for different numbers of clusters, I applied several performance metrics.
+
+- Rand Score
+- Mutual Information Score
+- V Measure
+- Silhouette Coefficient
+
+```{r, fig.width=6, fig.height=2.5, message=FALSE, warning=FALSE, fig.align="center"}
+cluster_metrics_adult %>%
+  filter(k != 100) %>%
+  mutate(
+    score_type = recode(score_type,
+                        adj_mutual_info = "Adj. Mutual Info",
+                        adj_rand = "Adj. Rand Score",
+                        silhouette = "Silhouette",
+                        v_measure = "V Measure"),
+    model = recode(model,
+                   em = "Expectation Maximization",
+                   kmeans = "K Means")
+  ) %>%
+  ggplot(aes(x = k, y = score, color = score_type)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~ model) +
+  theme_tq() +
+  theme(
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor.x = element_blank(),
+      text = element_text(size = 10, family = "CMU Serif"),
+      plot.title = element_text(face = "bold")
+    ) +
+  labs(
+    title = "Cluster Quality vs Number of Clusters",
+    x = "Number Of Means",
+    y = "Score",
+    color = NULL
+    )
+```
