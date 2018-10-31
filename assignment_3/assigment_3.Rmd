@@ -32,6 +32,8 @@ tsne_clusters_adult <- read_csv("tsne_clusters_adult.csv")
 
 two_d_adult <- read_csv("two_d_adult.csv")
 
+dim_reduction_adult <- read_csv("dim_reduction_adult.csv")
+
 cluster_metrics_adult <- read_csv("cluster_metrics_adult.csv") %>%
   select(k, model, adj_mutual_info, adj_rand, silhouette, v_measure) %>%
   gather(score_type, score, adj_mutual_info:v_measure)
@@ -65,7 +67,7 @@ nn_baseline_adult %>%
       text = element_text(size = 10, family = "CMU Serif"),
       plot.title = element_text(face = "bold"),
       legend.position = c(0,1),
-      legend.justification =  c(0,1),
+      legend.justification =  c(0,1)
     ) +
   labs(
     title = "Neural Network Learning Curve",
@@ -176,7 +178,7 @@ two_d_adult %>%
     ggplot(aes(x = X1, y = X2, color = y)) +
     geom_point(alpha = 0.5) +
     facet_wrap(~ algorithm, scales = "free") +
-      theme_minimal() +
+    theme_minimal() +
     theme(
         panel.grid.major.x = element_blank(),
         panel.grid.minor.x = element_blank(),
@@ -196,11 +198,158 @@ two_d_adult %>%
     guides(color = FALSE)
 ```
 
-Interestingly, ICA, PCA, and truncated SVD all produce the same results. Truncated SVD is an algorithm very similar to PCA
+Interestingly, ICA, PCA, and truncated SVD all produce the same results (ICA is flipped and rotated, but its structure is the same). ICA and PCA producing the same result indicates that our data is of a guassian distribution. In other words, all information about this data set and the distribution of its instances is captured by the covariance matrix used by PCA. There's nothing for the ICA to find that the PCA cannot, and so they produce the same result. The truncated SVD being identical to PCA also makes sense, since the data is standardized to $\mu = 0$ and $\sigma^2 = 1$, and truncated SVD is the same as PCA when the data is centered at the mean.
 
+In the two PCA components graphed, we can see two clusters, each predominantly of one class, which suggests that two clusters might be the optimal choice for grouping the data. This clustering scheme is also supported by results of our initial clustering.
 
+```{r, fig.width=6, fig.height=3.2, message=FALSE, warning=FALSE, fig.align="center"}
+dim_reduction_adult %>%
+  select(clusterer, algorithm, n, k, adj_rand, adj_mutual_info, v_measure, silhouette) %>%
+  gather(score_type, score, adj_rand:silhouette) %>%
+  filter(k != 100, n == 5) %>%
+  mutate(
+    score_type = recode(score_type,
+                        adj_mutual_info = "Adj. Mutual Info",
+                        adj_rand = "Adj. Rand Score",
+                        silhouette = "Silhouette Coeff.",
+                        v_measure = "V Measure"),
+    clusterer = recode(clusterer,
+                   em = "EM",
+                   kmeans = "K Means"),
+    algorithm = recode(algorithm,
+                       rp = "RP",
+                       ica = "ICA",
+                       pca = "PCA",
+                       svd = "SVD"),
+    title = paste(clusterer, ":", algorithm)
+  ) %>%
+  ggplot(aes(x = k, y = score, color = score_type)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~ title, nrow = 2) +
+  theme_minimal() +
+  theme(
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor.x = element_blank(),
+      text = element_text(size = 10, family = "CMU Serif"),
+      plot.title = element_text(face = "bold")
+    ) +
+  labs(
+    title = "Cluster Quality vs Number of Clusters",
+    x = "Number Of Means",
+    y = "Score",
+    color = NULL
+    )
+```
 
+```{r, fig.width=6, fig.height=3.2, message=FALSE, warning=FALSE, fig.align="center"}
+dim_reduction_adult %>%
+    arrange(n, k) %>%
+    mutate(n = as.factor(n), k = as.factor(k),
+           clusterer = recode(clusterer,
+                              em = "EM",
+                              kmeans = "K Means"),
+           algorithm = recode(algorithm,
+                              rp = "Random Proj.",
+                              ica = "ICA",
+                              pca = "PCA",
+                              svd = "SVD"),
+           title = paste(clusterer, ":", algorithm)) %>%
+    ggplot(aes(x = n, y = k)) +
+    geom_tile(aes(fill = adj_rand)) +
+    facet_wrap(~ title, nrow = 2) +
+    theme_minimal() +
+    theme(
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        text = element_text(size = 10, family = "CMU Serif"),
+        plot.title = element_text(face = "bold")
+      ) +
+    labs(
+      title = "Adjusted Rand Score for Different Hyperparameters",
+      subtitle = "Without Cluster Labels As Feature",
+      x = "Number of Components",
+      y = "Number of Clusters",
+      color = NULL
+      ) +
+    guides(fill = FALSE)
+```
 
+&nbsp;
+
+```{r, fig.width=6, fig.height=3.2, message=FALSE, warning=FALSE, fig.align="center"}
+dim_reduction_adult %>%
+    arrange(n, k) %>%
+    mutate(n = as.factor(n), k = as.factor(k),
+           clusterer = recode(clusterer,
+                              em = "EM",
+                              kmeans = "K Means"),
+           algorithm = recode(algorithm,
+                              rp = "Random Proj.",
+                              ica = "ICA",
+                              pca = "PCA",
+                              svd = "SVD"),
+           title = paste(clusterer, ":", algorithm)) %>%
+    ggplot(aes(x = n, y = k)) +
+    geom_tile(aes(fill = without_labels_mean)) +
+    facet_wrap(~ title, nrow = 2) +
+    theme_minimal() +
+    theme(
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        text = element_text(size = 10, family = "CMU Serif"),
+        plot.title = element_text(face = "bold")
+      ) +
+    labs(
+      title = "Cross Validation Score for Different Hyperparameters",
+      subtitle = "Without Cluster Labels As Feature",
+      x = "Number of Components",
+      y = "Number of Clusters",
+      color = NULL
+      ) +
+    guides(fill = FALSE)
+```
+
+&nbsp;
+
+```{r, fig.width=6, fig.height=3.2, message=FALSE, warning=FALSE, fig.align="center"}
+dim_reduction_adult %>%
+    arrange(n, k) %>%
+    mutate(n = as.factor(n), k = as.factor(k),
+           clusterer = recode(clusterer,
+                              em = "EM",
+                              kmeans = "K Means"),
+           algorithm = recode(algorithm,
+                              rp = "Random Proj.",
+                              ica = "ICA",
+                              pca = "PCA",
+                              svd = "SVD"),
+           title = paste(clusterer, ":", algorithm)) %>%
+    ggplot(aes(x = n, y = k)) +
+    geom_tile(aes(fill = with_labels_mean)) +
+    facet_wrap(~ title, nrow = 2) +
+    theme_minimal() +
+    theme(
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        text = element_text(size = 10, family = "CMU Serif"),
+        plot.title = element_text(face = "bold")
+      ) +
+    labs(
+      title = "Cross Validation Score for Different Hyperparameters",
+      subtitle = "With Cluster Labels As Feature",
+      x = "Number of Components",
+      y = "Number of Clusters",
+      color = NULL
+      ) +
+    guides(fill = FALSE)
+```
 
 
 
