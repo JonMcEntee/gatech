@@ -34,6 +34,14 @@ two_d_adult <- read_csv("two_d_adult.csv")
 
 dim_reduction_adult <- read_csv("dim_reduction_adult.csv")
 
+pca_explained_variance_adult <- read_csv("pca_explained_variance_adult.csv") %>%
+  mutate(explained_variance = explained_variance / sum(explained_variance),
+         cumulative_variance = cumsum(explained_variance))
+
+ica_kurtosis_adult <- read_csv("ica_kurtosis_adult.csv")
+
+reconstruction_error_adult <- read_csv("reconstruction_error_adult.csv")
+
 cluster_metrics_adult <- read_csv("cluster_metrics_adult.csv") %>%
   select(k, model, adj_mutual_info, adj_rand, silhouette, v_measure) %>%
   gather(score_type, score, adj_mutual_info:v_measure)
@@ -202,45 +210,136 @@ Interestingly, ICA, PCA, and truncated SVD all produce the same results (ICA is 
 
 In the two PCA components graphed, we can see two clusters, each predominantly of one class, which suggests that two clusters might be the optimal choice for grouping the data. This clustering scheme is also supported by results of our initial clustering.
 
+&nbsp;
+
+```{r, fig.width=6, fig.height=1.8, message=FALSE, warning=FALSE, fig.align="center"}
+pca_explained_variance_adult %>%
+    ggplot(aes(x = component, y = explained_variance)) +
+    geom_bar(stat = "identity") +
+    theme_minimal() +
+    theme(
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        text = element_text(size = 10, family = "CMU Serif"),
+        plot.title = element_text(face = "bold")
+      ) +
+    labs(
+      title = "Amount Of Variance Explained By Principal Component",
+      x = "Principal Component",
+      y = "Explained Variance",
+      color = NULL
+      ) +
+    scale_y_continuous(labels = scales::percent)
+```
+
+Examining the eigenvalues of our PCA we see that 14% of the variance in the data can be explained with two components, 50% can be explained with 13 components, and 95% can be explained with 37 components. Reducing the dimension of the data may improve the neural net's ability to train on the data, while still preserving most of the information within it.
+
+&nbsp;
+
+```{r, fig.width=6, fig.height=1.8, message=FALSE, warning=FALSE, fig.align="center"}
+ica_kurtosis_adult %>%
+    filter(n < 2 | n > 5) %>%
+    ggplot(aes(x = n, y = kurtosis)) +
+    geom_line() +
+    geom_point(shape = "square") +
+    theme_minimal() +
+    theme(
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        text = element_text(size = 10, family = "CMU Serif"),
+        plot.title = element_text(face = "bold")
+      ) +
+    labs(
+      title = "Kurtosis vs Number of ICA Components",
+      x = "Number of Components",
+      y = "Kurtosis",
+      color = NULL
+      )
+```
+
+For ICA the kurtosis, a measure of non-guassianity, increases monotonically with the number of components. This suggests the algorithm's components become more independent as the number of components increases.
+
+&nbsp;
+
+```{r, fig.width=6, fig.height=1.8, message=FALSE, warning=FALSE, fig.align="center"}
+reconstruction_error_adult %>%
+    group_by(n) %>%
+    summarize(
+      std = sd(mean, na.rm = TRUE),
+      mean = mean(mean, na.rm = TRUE)
+    ) %>%
+    ungroup() %>%
+    mutate(
+      bottom = mean - 1.96 * std,
+      top = mean + 1.96 * std
+    ) %>%
+    ggplot(aes(x = n)) +
+    geom_ribbon(aes(ymin = bottom, ymax = top), alpha = 0.5) +
+    geom_line(aes(y = mean)) +
+    geom_point(aes(y = mean), shape = "square") +
+    theme_minimal() +
+    theme(
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        text = element_text(size = 10, family = "CMU Serif"),
+        plot.title = element_text(face = "bold")
+      ) +
+    labs(
+      title = "Reconstruction Error For Different Component Sizes",
+      subtitle = "Averaged Over 20 Random Projections",
+      x = "Number of Components",
+      y = "Reconstruction Error",
+      color = NULL
+      )
+```
+
+The random projections were, unsurprisingly able to capture the data better with a higher number of components. The error plateaus at around 10 components.
+
+## Clustering Projected Data
+
+After projecting our data using a dimensionality reduction algorithm, we can try clustering again to see if the clusters have changed.
+
+&nbsp;
+
 ```{r, fig.width=6, fig.height=3.2, message=FALSE, warning=FALSE, fig.align="center"}
 dim_reduction_adult %>%
-  select(clusterer, algorithm, n, k, adj_rand, adj_mutual_info, v_measure, silhouette) %>%
-  gather(score_type, score, adj_rand:silhouette) %>%
-  filter(k != 100, n == 5) %>%
-  mutate(
-    score_type = recode(score_type,
-                        adj_mutual_info = "Adj. Mutual Info",
-                        adj_rand = "Adj. Rand Score",
-                        silhouette = "Silhouette Coeff.",
-                        v_measure = "V Measure"),
-    clusterer = recode(clusterer,
-                   em = "EM",
-                   kmeans = "K Means"),
-    algorithm = recode(algorithm,
-                       rp = "RP",
-                       ica = "ICA",
-                       pca = "PCA",
-                       svd = "SVD"),
-    title = paste(clusterer, ":", algorithm)
-  ) %>%
-  ggplot(aes(x = k, y = score, color = score_type)) +
-  geom_line() +
-  geom_point() +
-  facet_wrap(~ title, nrow = 2) +
-  theme_minimal() +
-  theme(
-      panel.grid.major.x = element_blank(),
-      panel.grid.minor.x = element_blank(),
-      text = element_text(size = 10, family = "CMU Serif"),
-      plot.title = element_text(face = "bold")
-    ) +
-  labs(
-    title = "Cluster Quality vs Number of Clusters",
-    x = "Number Of Means",
-    y = "Score",
-    color = NULL
-    )
+    arrange(n, k) %>%
+    mutate(n = as.factor(n), k = as.factor(k),
+           clusterer = recode(clusterer,
+                              em = "EM",
+                              kmeans = "K Means"),
+           algorithm = recode(algorithm,
+                              rp = "Random Proj.",
+                              ica = "ICA",
+                              pca = "PCA",
+                              svd = "SVD"),
+           title = paste(clusterer, ":", algorithm)) %>%
+    ggplot(aes(x = n, y = k)) +
+    geom_tile(aes(fill = silhouette)) +
+    facet_wrap(~ title, nrow = 2) +
+    theme_minimal() +
+    theme(
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        text = element_text(size = 10, family = "CMU Serif"),
+        plot.title = element_text(face = "bold")
+      ) +
+    labs(
+      title = "Silhouette Coefficient For Different Hyperparameters",
+      subtitle = "Lighter Tiles Indicate Higher Score",
+      x = "Number of Components",
+      y = "Number of Clusters",
+      color = NULL
+      ) +
+    guides(fill = FALSE) +
+    scale_fill_gradient(low = "darkgreen", high = "springgreen3")
 ```
+
+&nbsp;
 
 ```{r, fig.width=6, fig.height=3.2, message=FALSE, warning=FALSE, fig.align="center"}
 dim_reduction_adult %>%
@@ -268,34 +367,60 @@ dim_reduction_adult %>%
         plot.title = element_text(face = "bold")
       ) +
     labs(
-      title = "Adjusted Rand Score for Different Hyperparameters",
-      subtitle = "Without Cluster Labels As Feature",
+      title = "Adjusted Rand Score For Different Hyperparameters",
+      subtitle = "Lighter Tiles Indicate Higher Score.",
       x = "Number of Components",
       y = "Number of Clusters",
       color = NULL
       ) +
-    guides(fill = FALSE)
+    guides(fill = FALSE) +
+    scale_fill_gradient(low = "red4", high = "tomato2")
 ```
 
 &nbsp;
 
 ```{r, fig.width=6, fig.height=3.2, message=FALSE, warning=FALSE, fig.align="center"}
-dim_reduction_adult %>%
-    arrange(n, k) %>%
-    mutate(n = as.factor(n), k = as.factor(k),
-           clusterer = recode(clusterer,
-                              em = "EM",
-                              kmeans = "K Means"),
-           algorithm = recode(algorithm,
-                              rp = "Random Proj.",
-                              ica = "ICA",
-                              pca = "PCA",
-                              svd = "SVD"),
-           title = paste(clusterer, ":", algorithm)) %>%
-    ggplot(aes(x = n, y = k)) +
-    geom_tile(aes(fill = without_labels_mean)) +
+sds <- dim_reduction_adult %>%
+    filter(k == 2) %>%
+    select(algorithm, clusterer, n, k, with_labels_sd, without_labels_sd) %>%
+    gather(score_type, std, with_labels_sd:without_labels_sd) %>%
+    mutate(score_type = recode(score_type,
+                               without_labels_sd = "without_labels",
+                               with_labels_sd = "with_labels"))
+
+means <- dim_reduction_adult %>%
+    filter(k == 2) %>%
+    select(algorithm, clusterer, n, k, with_labels_mean, without_labels_mean) %>%
+    gather(score_type, mean, with_labels_mean:without_labels_mean) %>%
+    mutate(score_type = recode(score_type,
+                             without_labels_mean = "without_labels",
+                             with_labels_mean = "with_labels")) %>%
+    left_join(sds, by = c("algorithm", "clusterer", "score_type", "n"))
+
+means %>%
+    filter(n < 2 | n > 5) %>%
+    mutate(
+       bottom = mean - 1.96 * std,
+       top = mean + 1.96 * std,
+       clusterer = recode(clusterer,
+                          em = "EM",
+                          kmeans = "K Means"),
+       algorithm = recode(algorithm,
+                          rp = "RP",
+                          ica = "ICA",
+                          pca = "PCA",
+                          svd = "SVD"),
+       title = paste(clusterer, ":", algorithm),
+       score_type = recode(score_type,
+                           with_labels = "With Labels",
+                           without_labels = "Without Labels")
+    ) %>%
+    ggplot(aes(x = n)) +
+    geom_ribbon(aes(ymin = bottom, ymax = top, fill = score_type), alpha = 0.1) +
+    geom_line(aes(y = mean, color = score_type)) +
+    geom_point(aes(y = mean, color = score_type)) +
     facet_wrap(~ title, nrow = 2) +
-    theme_minimal() +
+    theme_tq() +
     theme(
         panel.grid.major.x = element_blank(),
         panel.grid.minor.x = element_blank(),
@@ -305,13 +430,12 @@ dim_reduction_adult %>%
         plot.title = element_text(face = "bold")
       ) +
     labs(
-      title = "Cross Validation Score for Different Hyperparameters",
-      subtitle = "Without Cluster Labels As Feature",
+      title = "Neural Network Performance With And Without Labels",
       x = "Number of Components",
-      y = "Number of Clusters",
-      color = NULL
-      ) +
-    guides(fill = FALSE)
+      y = "Accuracy",
+      color = NULL,
+      fill = NULL
+      )
 ```
 
 &nbsp;
