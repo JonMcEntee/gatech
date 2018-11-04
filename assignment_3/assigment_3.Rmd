@@ -45,11 +45,322 @@ reconstruction_error_adult <- read_csv("reconstruction_error_adult.csv")
 cluster_metrics_adult <- read_csv("cluster_metrics_adult.csv") %>%
   select(k, model, adj_mutual_info, adj_rand, silhouette, v_measure) %>%
   gather(score_type, score, adj_mutual_info:v_measure)
+
+tsne_clusters_digits <- read_csv("tsne_clusters_digits.csv")
+
+two_d_digits <- read_csv("two_d_digits.csv")
+
+dim_reduction_digits <- read_csv("dim_reduction_digits.csv")
+
+pca_explained_variance_digits <- read_csv("pca_explained_variance_digits.csv") %>%
+  mutate(explained_variance = explained_variance / sum(explained_variance),
+         cumulative_variance = cumsum(explained_variance))
+
+ica_kurtosis_digits <- read_csv("ica_kurtosis_digits.csv")
+
+reconstruction_error_digits <- read_csv("reconstruction_error_digits.csv")
+
+cluster_metrics_digits <- read_csv("cluster_metrics_digits.csv") %>%
+  select(k, model, adj_mutual_info, adj_rand, silhouette, v_measure) %>%
+  gather(score_type, score, adj_mutual_info:v_measure)
 ```
+
+# The Digits Dataset
+
+The digits dataset is a preprocessed version of the NIST handwritten digits dataset. The 32x32 bitmaps are broken into 4x4 squares and their values are averaged, producing a 8x8 array with the average pixel value from each square. This processing reduces variance and makes classification algorithms less likely to train to noise. There are 10 classes, one for each digit.
+
+## Cluster Analysis With K-Means and Expectation Maximization
+
+Using the scikit-learn library for Python, I ran the data set through both a k-means and an expectation maximization algorithm. To evaluate the quality of the clustering algorithms for different numbers of clusters, I applied several performance metrics. The descriptions below are paraphrased from the scikit-learn documentation.
+
+- **Rand Score:** A metric for supervised learning. Defined as $RI = (a + b)/{n_{pairs}}$, where $a$ is the number of pairs of that are in the same cluster that also have the same class, $b$ is the number of pairs of elements in different clusters that have a different class, and $n_{pairs}$ is the total number of possible unordered pairs. The score is bounded between -1 and 1, and a higher score is seen as a better clustering. We actually use an "adjusted" rand score which assigns random labelings close to 0.
+
+- **Mutual Information Score:** A metric for supervised learning. Defined as the mutual information between the clustering of the data and the true classification of the data. Probability for each cluster or class $i \in C$ is $|C_i|/|C|$. It is bounded between 0 and 1 with a higher score representating higher mutual information, and therefore a clustering scheme that represents the underlying classes. The mutual information score has a tendency to go up with the number of clusters. Therefore we use an adjusted mutual information score that does not have this tendency.
+
+- **V Measure:** A supervised learning metric. The harmonic mean of a clustering scheme's "homogeneity" and "completeness". Where homogeneity is a measure of each cluster only containing one class, and completeness is a measure of all members of a given class being assigned to the same cluster. Bounded between 0 and 1, with higher scores indicating better clustering schemes.
+
+- **Silhouette Coefficient:** An unsupervised learning metric. for each sample a silhouette coefficient $s = (b - a)/max(a,b)$ is calculated. Where $a$ is the mean distance between the sample and all other points of the same class, and $b$ is the mean distance between the sample and all other points in the next nearest cluster. It is bounded between -1 and 1, with higher scores indicating denser clustering.
+
+&nbsp;
+
+```{r, fig.width=6, fig.height=1.5, message=FALSE, warning=FALSE, fig.align="center"}
+cluster_metrics_digits %>%
+  filter(k != 100) %>%
+  mutate(
+    score_type = recode(score_type,
+                        adj_mutual_info = "Adj. Mutual Info",
+                        adj_rand = "Adj. Rand Score",
+                        silhouette = "Silhouette Coeff.",
+                        v_measure = "V Measure"),
+    model = recode(model,
+                   em = "Expectation Maximization",
+                   kmeans = "K Means")
+  ) %>%
+  ggplot(aes(x = k, y = score, color = score_type)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~ model) +
+  theme_minimal() +
+  theme(
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor.x = element_blank(),
+      text = element_text(size = 10, family = "CMU Serif"),
+      plot.title = element_text(face = "bold")
+    ) +
+  labs(
+    title = "Cluster Quality vs Number of Clusters",
+    x = "Number Of Means",
+    y = "Score",
+    color = NULL
+    )
+```
+
+These scores were calculated for both k-means, and expectation maximization, for different numbers of means ranging from 2 to 50. The expectation maximization clustering peaks for all scores at 10 clusters, the same as our number of classes. For K-Means, the scores peak at 15, but are still high at 10. This suggests that there are distinguishable clusters that exist in high dimensional space. Lets try to reduce the dimensionality of the dataset and plot these clusters.
+
+## Dimensionality Reduction Algorithms
+
+Our digits dataset has 64 features, which makes it difficult to visualize. Dimensionality reduction algorithms allow us to visualize high dimensional datasets as two dimensional plots. The dataset is visualized below in two dimensions using the t-SNE algorithm for different values of the "perplexity" hyper-parameter.
+
+&nbsp;
+
+```{r, fig.width=6, fig.height=3, message=FALSE, warning=FALSE, fig.align="center"}
+tsne_clusters_digits %>%
+    mutate(y = as.factor(y)) %>%
+    ggplot(aes(x = X1, y = X2, color = y)) +
+    geom_point(alpha = 1) +
+    facet_wrap(~ perplexity, nrow = 2,  scales = "free") +
+    theme_minimal() +
+    theme(
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        text = element_text(size = 10, family = "CMU Serif"),
+        plot.title = element_text(face = "bold", hjust = 0.4),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank()
+      ) +
+    labs(
+      title = "tSNE Dimensionality Reduction Of The Digits Dataset",
+      x = "X1",
+      y = "X2",
+      color = NULL
+      )
+    # guides(color = FALSE)
+```
+
+t-SNE is a dimensionality reduction algorithm that preserves local pairwise distances and is helpful for pulling out cluster structure in high-dimensional data. Here we can see the different digits neatly settled into their own clusters. This confirms that the digits of the same class are closer to each other in 64 dimensional space. We would expect clustering algorithms to work very well on this data set.
+
+&nbsp;
+
+```{r, fig.width=6, fig.height=2.5, message=FALSE, warning=FALSE, fig.align="center"}
+two_d_digits %>%
+    mutate(y = as.factor(y)) %>%
+    mutate(
+    algorithm = recode(algorithm,
+                        pca = "PCA",
+                        ica = "ICA",
+                        rp = "Randomized Projection",
+                        svd = "Truncated SVD")) %>%
+    ggplot(aes(x = X1, y = X2, color = y)) +
+    geom_point(alpha = 1) +
+    facet_wrap(~ algorithm, scales = "free") +
+    theme_minimal() +
+    theme(
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        text = element_text(size = 10, family = "CMU Serif"),
+        plot.title = element_text(face = "bold", hjust = 0.4),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank()
+      ) +
+    labs(
+      title = "Various Dimensionality Reduction Strategies on Digits",
+      x = "X1",
+      y = "X2",
+      color = NULL
+      )
+```
+
+t-SNE is not the only dimensionality reduction algorithm we can use. Both principle component analysis, and independent component analysis are able to cluster the digits as well, although not as cleanly as t-SNE.
+
+&nbsp;
+
+```{r, fig.width=6, fig.height=1.8, message=FALSE, warning=FALSE, fig.align="center"}
+pca_explained_variance_digits %>%
+    ggplot(aes(x = component, y = explained_variance)) +
+    geom_bar(stat = "identity") +
+    theme_minimal() +
+    theme(
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        text = element_text(size = 10, family = "CMU Serif"),
+        plot.title = element_text(face = "bold")
+      ) +
+    labs(
+      title = "Amount Of Variance Explained By Principal Component",
+      x = "Principal Component",
+      y = "Explained Variance",
+      color = NULL
+      ) +
+    scale_y_continuous(labels = scales::percent)
+```
+
+Looking at the PCA's eigenvalues we see that more than 50% of the data's variance can be explained within five components, and almost 90% can be portrayed by twenty. This seems to suggest that the dimension of this dataset could be reduced significantly without losing much information.
+
+&nbsp;
+
+```{r, fig.width=6, fig.height=1.8, message=FALSE, warning=FALSE, fig.align="center"}
+ica_kurtosis_digits %>%
+    ggplot(aes(x = n, y = kurtosis)) +
+    geom_line() +
+    geom_point(shape = "square") +
+    theme_minimal() +
+    theme(
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        text = element_text(size = 10, family = "CMU Serif"),
+        plot.title = element_text(face = "bold")
+      ) +
+    labs(
+      title = "Kurtosis vs Number of ICA Components",
+      x = "Number of Components",
+      y = "Kurtosis",
+      color = NULL
+      )
+```
+
+The kurtosis of ICA increases with the number of components. Since we want a set of components that are non-guassian, we search for a kurtosis that is far from three. Both a small number of components ($\leq 10$), and a large number of components ($\geq 50$) fit that definition.
+
+&nbsp;
+
+```{r, fig.width=6, fig.height=1.8, message=FALSE, warning=FALSE, fig.align="center"}
+reconstruction_error_digits %>%
+    group_by(n) %>%
+    summarize(
+      std = sd(mean, na.rm = TRUE),
+      mean = mean(mean, na.rm = TRUE)
+    ) %>%
+    ungroup() %>%
+    mutate(
+      bottom = mean - 1.96 * std,
+      top = mean + 1.96 * std
+    ) %>%
+    ggplot(aes(x = n)) +
+    geom_ribbon(aes(ymin = bottom, ymax = top), alpha = 0.5) +
+    geom_line(aes(y = mean)) +
+    geom_point(aes(y = mean), shape = "square") +
+    theme_minimal() +
+    theme(
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        text = element_text(size = 10, family = "CMU Serif"),
+        plot.title = element_text(face = "bold")
+      ) +
+    labs(
+      title = "Reconstruction Error For Different Component Sizes",
+      subtitle = "Averaged Over 20 Random Projections",
+      x = "Number of Components",
+      y = "Reconstruction Error",
+      color = NULL
+      )
+```
+
+For our randomized projections, the average reconstruction error declines with more components. Which makes sense, as more components means more information is preserved.
+
+\pagebreak
+
+## Clustering Projected Data
+
+Now we attempt to cluster the projected data, to see how the quality of our clustering improves or declines with different dimensionality reductions and numbers of clusters.
+
+&nbsp;
+
+```{r, fig.width=6, fig.height=3.2, message=FALSE, warning=FALSE, fig.align="center"}
+dim_reduction_digits %>%
+    arrange(n, k) %>%
+    mutate(n = as.factor(n), k = as.factor(k),
+           clusterer = recode(clusterer,
+                              em = "EM",
+                              kmeans = "K Means"),
+           algorithm = recode(algorithm,
+                              rp = "Random Proj.",
+                              ica = "ICA",
+                              pca = "PCA",
+                              svd = "SVD"),
+           title = paste(clusterer, ":", algorithm)) %>%
+    ggplot(aes(x = n, y = k)) +
+    geom_tile(aes(fill = silhouette)) +
+    facet_wrap(~ title, nrow = 2) +
+    theme_minimal() +
+    theme(
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        text = element_text(size = 10, family = "CMU Serif"),
+        plot.title = element_text(face = "bold")
+      ) +
+    labs(
+      title = "Silhouette Coefficient For Different Hyperparameters",
+      subtitle = "Lighter Tiles Indicate Higher Score",
+      x = "Number of Components",
+      y = "Number of Clusters",
+      color = NULL
+      ) +
+    guides(fill = FALSE) +
+    scale_fill_gradient(low = "darkgreen", high = "springgreen3")
+```
+
+Looking at the silhouette coefficient over different hyper parameters, we see that, in general, lower dimensional datasets tend to have a higher coefficient. This indicates that lower dimensional datasets are more densely clustered.
+
+&nbsp;
+
+```{r, fig.width=6, fig.height=3.2, message=FALSE, warning=FALSE, fig.align="center"}
+dim_reduction_digits %>%
+    arrange(n, k) %>%
+    mutate(n = as.factor(n), k = as.factor(k),
+           clusterer = recode(clusterer,
+                              em = "EM",
+                              kmeans = "K Means"),
+           algorithm = recode(algorithm,
+                              rp = "Random Proj.",
+                              ica = "ICA",
+                              pca = "PCA",
+                              svd = "SVD"),
+           title = paste(clusterer, ":", algorithm)) %>%
+    ggplot(aes(x = n, y = k)) +
+    geom_tile(aes(fill = adj_rand)) +
+    facet_wrap(~ title, nrow = 2) +
+    theme_minimal() +
+    theme(
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        text = element_text(size = 10, family = "CMU Serif"),
+        plot.title = element_text(face = "bold")
+      ) +
+    labs(
+      title = "Adjusted Rand Score For Different Hyperparameters",
+      subtitle = "Lighter Tiles Indicate Higher Score.",
+      x = "Number of Components",
+      y = "Number of Clusters",
+      color = NULL
+      ) +
+    guides(fill = FALSE) +
+    scale_fill_gradient(low = "red4", high = "tomato2")
+```
+
+The adjusted rand score on the other hand, doesn't seem to improve with more components, with the exception of the randomly projected components. However, the number of clusters still has a noticeable effect on score. The rand score seems to peak around 10 or 15 clusters, which is what we would expect given the data clusters so naturally into its 10 classes.
 
 # The Adult Dataset
 
-The Adult dataset has 32,000+ samples and features for each adult including their age, sex, race, etc. Our objective is to predict whether each adult has an income of greater or less than $50,000, making this a binary classification problem. In assignment 1, using the scikit-learn library for Python, I ran a 6000 instance subsample of the dataset on a neural network classifier with a single layer of 90 nodes. I was able to achieve an accuracy of 79.3% on my test set. In this analysis I again subsampled the data to 6000 instances.
+The Adult dataset has 32,000+ samples and features for each adult including their age, sex, race, etc. Our objective is to predict whether each adult has an income of greater or less than $50,000, making this a binary classification problem. In assignment 1, using the scikit-learn library for Python, I ran a 6000 instance subsample of the dataset on a neural network classifier with a single layer of 90 nodes. I was able to achieve an accuracy of 79.3% on my test set. In this analysis I again subsampled the data to 6000 instances. That data was further split into a training set of 5400 instances and a test set of 600 instances. 
 
 The adult dataset has dozens of one-hot encoded variables, which is problematic for clustering algorithms that assume euclidean distance. To counter this I reduced the number of features to the 40 most important (as determined by a random forest classifier), and scaled the data using scikit-learn's StandardScaler so that no feature would be weighted more heavily than the others.
 
@@ -90,21 +401,9 @@ As the cross-validation score did not seem to improve with more nodes, I reduced
 
 ## Cluster Analysis With K-Means and Expectation Maximization
 
-Using the scikit-learn library for Python, I ran the feature-reduced, subsampled data set through both a k-means and an expectation maximization algorithm. To evaluate the quality of the clustering algorithms for different numbers of clusters, I applied several performance metrics. The descriptions below are taken from the scikit-learn documentation.
-
-- **Rand Score:** A metric for supervised learning. Defined as $RI = (a + b)/{n_{pairs}}$, where $a$ is the number of pairs of that are in the same cluster that also have the same class, $b$ is the number of pairs of elements in different clusters that have a different class, and $n_{pairs}$ is the total number of possible unordered pairs. The score is bounded between -1 and 1, and a higher score is seen as a better clustering. We actually use an "adjusted" rand score which assigns random labelings close to 0.
-
-- **Mutual Information Score:** A metric for supervised learning. Defined as the mutual information between the clustering of the data and the true classification of the data. Probability for each cluster or class $i \in C$ is $|C_i|/|C|$. It is bounded between 0 and 1 with a higher score representating higher mutual information, and therefore a clustering scheme that represents the underlying classes. The mutual information score as is has a tendency to go up with the number of clusters. Therefore we use an adjusted mutual information score that does not have this tendency.
-
-- **V Measure:** A supervised learning metric. The harmonic mean of a clustering scheme's "homogeneity" and "completeness". Where homogeneity is a measure of each cluster only containing one class, and completeness is a measure of all members of a given class being assigned to the same cluster. Bounded between 0 and 1, with higher scores indicating better clustering schemes.
-
-- **Silhouette Coefficient:** An unsupervised learning metric. for each sample a silhouette coefficient $s = (b - a)/max(a,b)$ is calculated. Where $a$ is the mean distance between the sample and all other points of the same class, and $b$ is the mean distance between the sample and all other points in the next nearest cluster. It is bounded between -1 and 1, with higher scores indicating denser clustering.
-
-These scores were calculated for both k-means, and expectation maximization, for different numbers of means ranging from 2 to 50.  
-  
 &nbsp;
 
-```{r, fig.width=6, fig.height=2.5, message=FALSE, warning=FALSE, fig.align="center"}
+```{r, fig.width=6, fig.height=1.5, message=FALSE, warning=FALSE, fig.align="center"}
 cluster_metrics_adult %>%
   filter(k != 100) %>%
   mutate(
@@ -140,7 +439,7 @@ All of our supervised learning metrics show two clusters as the optimal clusteri
 
 ## Dimensionality Reduction Algorithms
 
-Our feature reduced adult dataset still has 40 features, which makes it difficult to visualize. Dimensionality reduction algorithms allow us to visualize high dimensional datasets as two dimensional plots. The dataset is visualized below in two dimensions using the t-SNE algorithm.
+Our feature reduced adult dataset still has 40 features, which makes it difficult to visualize. Lets plot it out using t-SNE.
 
 &nbsp;
 
@@ -148,7 +447,7 @@ Our feature reduced adult dataset still has 40 features, which makes it difficul
 tsne_clusters_adult %>%
     ggplot(aes(x = X1, y = X2, color = y)) +
     geom_point(alpha = 0.1) +
-    facet_wrap(~ perplexity, nrow = 2) +
+    facet_wrap(~ perplexity, nrow = 2,  scales = "free") +
     theme_minimal() +
     theme(
         panel.grid.major.x = element_blank(),
@@ -169,13 +468,11 @@ tsne_clusters_adult %>%
     guides(color = FALSE)
 ```
 
-t-SNE is a dimensionality reduction algorithm that preserves local pairwise distances and is helpful for pulling out cluster structure in high-dimensional data. Unfortunately our t-SNE graph seems to suggest only one cluster in euclidean space, which will be very problematic for our cluster analysis.
-
-t-SNE is not the only dimensionality reduction algorithm we have though, below I have projected the data into two dimensions with four separate algorithms: principle component analysis, independent component analysis, randomized projection, and truncated singular value decomposition.
+Unfortunately our t-SNE graph shows only one cluster in euclidean space, which will be very problematic for our cluster analysis. t-SNE is not the only dimensionality reduction algorithm we have though, below I have projected the data into two dimensions with four separate algorithms: principle component analysis, independent component analysis, randomized projection, and truncated singular value decomposition.
 
 &nbsp;
 
-```{r, fig.width=6, fig.height=4, message=FALSE, warning=FALSE, fig.align="center"}
+```{r, fig.width=6, fig.height=3, message=FALSE, warning=FALSE, fig.align="center"}
 two_d_adult %>%
     mutate(
     algorithm = recode(algorithm,
@@ -208,7 +505,7 @@ two_d_adult %>%
 
 Interestingly, ICA, PCA, and truncated SVD all produce the same results (ICA is flipped and rotated, but its structure is the same). ICA and PCA producing the same result indicates that our data is of a guassian distribution. In other words, all information about this data set and the distribution of its instances is captured by the covariance matrix used by PCA. There's nothing for the ICA to find that the PCA cannot, and so they produce the same result. The truncated SVD being identical to PCA also makes sense, since the data is standardized to $\mu = 0$ and $\sigma^2 = 1$, and truncated SVD is the same as PCA when the data is centered at the mean.
 
-In the two PCA components graphed, we can see two clusters, each predominantly of one class, which suggests that two clusters might be the optimal choice for grouping the data. This clustering scheme is also supported by results of our initial clustering.
+In the two PCA components graphed, we can see two clusters, each predominantly of one class, which suggests that two clusters might be the optimal choice for grouping the data. This clustering scheme is also supported by the results of our initial clustering.
 
 &nbsp;
 
@@ -299,7 +596,7 @@ The random projections were, unsurprisingly able to capture the data better with
 
 ## Clustering Projected Data
 
-After projecting our data using a dimensionality reduction algorithm, we can try clustering again to see if the clusters have changed.
+After projecting our data using a dimensionality reduction algorithm, we can try clustering again to see if the clusters have changed. The hotmaps below show how two metrics: the silhouette coefficient and the adjusted rand score of the clustering schemes, change with hyper parameters. Lighter tiles indicate a higher metric value.
 
 &nbsp;
 
@@ -377,6 +674,12 @@ dim_reduction_adult %>%
     scale_fill_gradient(low = "red4", high = "tomato2")
 ```
 
+We see that the silhouette coefficient is generally higher when the number of components is lower. This indicates that as the dimensionality decreases, the ability of both our EM and K-means algorithms to group data into dense clusters improves. The adjusted rand score on the other hand, seems to change little with the number of components, but is apparently higher when the number of clusters is two.
+
+## Running Projected Data Through Neural Network
+
+Finally, we run the projected data through our neural network, to see if it can improve the accuracy of our predictions. Since the data overwhelmingly suggests that two clusters is ideal, we calculate the cross-validated accuracy scores for different numbers of components, both with labels from a two-mean clustering scheme and without.
+
 &nbsp;
 
 ```{r, fig.width=6, fig.height=3.2, message=FALSE, warning=FALSE, fig.align="center"}
@@ -438,6 +741,8 @@ means %>%
       )
 ```
 
+But the data shows no statistical difference between training with labels and training without, regardless of the number of components or the algorithms used. Finally let's look at how the accuracy changes over all possible numbers of components and numbers of clusters.
+
 &nbsp;
 
 ```{r, fig.width=6, fig.height=3.2, message=FALSE, warning=FALSE, fig.align="center"}
@@ -454,7 +759,7 @@ dim_reduction_adult %>%
                               svd = "SVD"),
            title = paste(clusterer, ":", algorithm)) %>%
     ggplot(aes(x = n, y = k)) +
-    geom_tile(aes(fill = with_labels_mean)) +
+    geom_tile(aes(fill = without_labels_mean)) +
     facet_wrap(~ title, nrow = 2) +
     theme_minimal() +
     theme(
@@ -467,7 +772,7 @@ dim_reduction_adult %>%
       ) +
     labs(
       title = "Cross Validation Score for Different Hyperparameters",
-      subtitle = "With Cluster Labels As Feature",
+      subtitle = "Without Cluster Labels As Feature",
       x = "Number of Components",
       y = "Number of Clusters",
       color = NULL
@@ -475,11 +780,18 @@ dim_reduction_adult %>%
     guides(fill = FALSE)
 ```
 
+The information here suggests that more components lead to higher accuracy scores. Which means that dimensionality reduction is not helping to improve our accuracy metrics. The final accuracy score on the test set for each of the different dimensionality reduction techniques (reduced to 30 dimensions for PCA, ICA, RP, and SVD) are shown below.
 
+### Final Accuracy Results By Strategy
 
-
-
-
-
-
-
+```{r}
+tribble(
+  ~Strategy, ~Score,
+  "No Dimensionality Reduction", "84.8%",
+  "Principle Component Analysis", "85%",
+  "Independent Component Analysis", "83.1%",
+  "Random Projection", "84.5%",
+  "Truncated SVD", "84.3%"
+) %>%
+knitr::kable()
+```
